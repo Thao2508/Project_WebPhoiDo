@@ -22,3 +22,30 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Python compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Python environment
+venv/
+.venv/
+env/
+/env/
+/venv/
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
