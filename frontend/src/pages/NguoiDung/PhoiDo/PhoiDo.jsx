@@ -43,25 +43,7 @@ export default function PhoiDoNgay() {
 
         {/* HEADER */}
         <div className="ph-header">
-
-          <div>
-
-            <p className="ph-subtitle">
-              Fashion Recommendation
-            </p>
-
-            <h1>Phối đồ ngay</h1>
-
-          </div>
-
-          <button className="ph-btn">
-
-            <Sparkles size={18} />
-
-            Gợi ý outfit
-
-          </button>
-
+              <h1>Phối đồ ngay</h1>
         </div>
 
         {/* FORM */}
@@ -104,22 +86,6 @@ export default function PhoiDoNgay() {
 
             </div>
 
-            {/* COLOR */}
-            <div className="ph-card">
-
-              <h3>Tông màu mong muốn</h3>
-
-              <div className="color-list">
-
-                <span className="black"></span>
-                <span className="white"></span>
-                <span className="beige"></span>
-                <span className="blue"></span>
-                <span className="purple"></span>
-
-              </div>
-
-            </div>
 
           </div>
 
@@ -191,7 +157,13 @@ export default function PhoiDoNgay() {
               Phối đồ ngay
 
             </button>
+            <div className="empty-result">
+            <p>
+                Hãy chọn phong cách, dịp sử dụng
+                và upload trang phục để bắt đầu phối đồ
+            </p>
 
+            </div>
           </div>
 
         </div>

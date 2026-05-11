@@ -11,9 +11,6 @@
 
 .phoido-main {
   flex: 1;
-
-  margin-left: 230px;
-
   padding: 30px 36px;
 }
 
@@ -331,4 +328,35 @@
   .preview-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.empty-result {
+
+  margin-top: 28px;
+
+  background: white;
+
+  border-radius: 28px;
+
+  padding: 60px 30px;
+
+  text-align: center;
+
+  border: 1px solid #ececec;
+}
+
+.empty-result h3 {
+
+  font-size: 28px;
+
+  margin-bottom: 12px;
+
+  color: #1f1f1f;
+}
+
+.empty-result p {
+
+  color: #777;
+
+  line-height: 1.7;
 }

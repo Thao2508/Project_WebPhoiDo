@@ -11,57 +11,81 @@ import {
   Upload,
   Heart,
   Shirt,
-  ArrowRight,
+  ArrowRight
 } from "lucide-react";
 
-import { Link, useNavigate } from "react-router-dom";
+import {
+  Link,
+  useNavigate
+} from "react-router-dom";
 
 export default function TrangChu() {
+
   const navigate = useNavigate();
 
-  // FALSE = CHƯA ĐĂNG NHẬP
-  // TRUE = ĐÃ ĐĂNG NHẬP
-  const isLogin = false;
+  // USER
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
 
+  const isLogin = !!user;
+
+  // OUTFIT DATA
   const outfits = [
+
     {
       ao: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=600&auto=format&fit=crop",
+
       quan:
         "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop",
+
       style: "Casual",
-      occasion: "Đi học",
+
+      occasion: "Đi học"
     },
 
     {
       ao: "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=600&auto=format&fit=crop",
+
       quan:
         "https://images.unsplash.com/photo-1506629905607-d9c297d4d42c?q=80&w=600&auto=format&fit=crop",
+
       style: "Minimal",
-      occasion: "Đi làm",
+
+      occasion: "Đi làm"
     },
 
     {
       ao: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?q=80&w=600&auto=format&fit=crop",
+
       quan:
         "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?q=80&w=600&auto=format&fit=crop",
+
       style: "Korean",
-      occasion: "Đi chơi",
+
+      occasion: "Đi chơi"
     },
 
     {
       ao: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop",
+
       quan:
         "https://images.unsplash.com/photo-1506629905607-d9c297d4d42c?q=80&w=600&auto=format&fit=crop",
+
       style: "Streetwear",
-      occasion: "Dạo phố",
-    },
+
+      occasion: "Dạo phố"
+    }
   ];
 
+  // LOGIN REQUIRED
   const requireLogin = () => {
+
     navigate("/dangnhap");
   };
 
   return (
+
     <div className="home">
 
       {/* SIDEBAR */}
@@ -73,8 +97,9 @@ export default function TrangChu() {
         {/* TOPBAR */}
         <div className="topbar">
 
-          {/* LOGO */}
+          {/* GUEST LOGO */}
           {!isLogin && (
+
             <div className="guest-logo">
 
               <Shirt size={24} />
@@ -91,7 +116,7 @@ export default function TrangChu() {
 
             <input
               type="text"
-              placeholder="Tìm kiếm outfit, phong cách..."
+              placeholder="Tìm kiếm trang phục, phong cách, dịp sử dụng..."
             />
 
           </div>
@@ -100,6 +125,7 @@ export default function TrangChu() {
           <div className="top-right">
 
             {isLogin ? (
+
               <>
                 <Bell size={20} />
 
@@ -110,171 +136,276 @@ export default function TrangChu() {
                     alt=""
                   />
 
-                  <span>Minh Anh</span>
+                  <span>
+                    {user?.tenDangNhap}
+                  </span>
 
                 </div>
               </>
+
             ) : (
+
               <div className="auth-buttons">
 
                 <Link to="/dangnhap">
+
                   <button className="login-btn">
                     Đăng nhập
                   </button>
+
                 </Link>
 
                 <Link to="/dangky">
+
                   <button className="register-btn">
                     Đăng ký
                   </button>
+
                 </Link>
 
               </div>
             )}
 
           </div>
-        </div>
-
-        {/* HERO */}
-        <div className="hero">
-          <div className="hero-left">
-            <h1>
-              Phối đồ <br />
-              theo phong cách của bạn
-            </h1>
-
-            <p className="hero-desc">
-              Outfitly giúp bạn phối hợp áo và quần
-              phù hợp theo phong cách, màu sắc
-              và dịp sử dụng.
-            </p>
-
-            {!isLogin && (
-              <div className="hero-buttons">
-
-                <button
-                  className="primary-btn"
-                  onClick={requireLogin}
-                >
-                  <Sparkles size={18} />
-
-                  Phối đồ ngay
-                </button>
-
-                <button className="secondary-btn">
-                  Khám phá outfit
-                </button>
-
-              </div>
-            )}
-
-          </div>
-
-          <div className="hero-right">
-
-            <img
-              src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1600&auto=format&fit=crop"
-              alt=""
-            />
-
-          </div>
 
         </div>
 
-        {/* USER DASHBOARD */}
-        {isLogin && (
-          <div className="actions">
+        {/* ========================= */}
+        {/* CHƯA ĐĂNG NHẬP */}
+        {/* ========================= */}
 
-            <div className="action-card">
+        {!isLogin && (
 
-              <div className="icon purple">
-                <Sparkles size={22} />
-              </div>
+          <>
 
-              <div>
+            {/* HERO */}
+            <div className="hero">
 
-                <h3>Phối đồ ngay</h3>
+              <div className="hero-left">
+                <h1>
+                  Phối đồ theo
+                  <br />
+                  phong cách của bạn
+                </h1>
 
-                <p>
-                  Nhận gợi ý outfit phù hợp với phong cách của bạn
+                <p className="hero-desc">
+
+                  Outfitly giúp bạn phối hợp áo và quần
+                  phù hợp theo phong cách, màu sắc
+                  và dịp sử dụng.
+
                 </p>
+
+                <div className="hero-buttons">
+
+                  <button
+                    className="primary-btn"
+                    onClick={requireLogin}
+                  >
+
+                    <Sparkles size={18} />
+
+                    Phối đồ ngay
+
+                  </button>
+
+                  <button className="secondary-btn">
+
+                    Khám phá outfit
+
+                  </button>
+
+                </div>
+
+              </div>
+
+              <div className="hero-right">
+
+                <img
+                  src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1600&auto=format&fit=crop"
+                  alt=""
+                />
 
               </div>
 
             </div>
 
-            <div className="action-card">
+            {/* STYLE SECTION */}
+            <div className="style-section">
 
-              <div className="icon orange">
-                <Upload size={22} />
+              <div className="section-header">
+
+                <h2>Khám phá phong cách</h2>
+
+                <span>
+
+                  Xem tất cả
+
+                  <ArrowRight size={16} />
+
+                </span>
+
               </div>
 
-              <div>
+              <div className="styles">
 
-                <h3>Upload trang phục</h3>
+                <div className="style-card">
 
-                <p>
-                  Thêm trang phục vào tủ đồ của bạn
-                </p>
+                  <img
+                    src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1000&auto=format&fit=crop"
+                    alt=""
+                  />
+
+                  <div className="style-overlay">
+                    Casual
+                  </div>
+
+                </div>
+
+                <div className="style-card">
+
+                  <img
+                    src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop"
+                    alt=""
+                  />
+
+                  <div className="style-overlay">
+                    Korean
+                  </div>
+
+                </div>
+
+                <div className="style-card">
+
+                  <img
+                    src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1000&auto=format&fit=crop"
+                    alt=""
+                  />
+
+                  <div className="style-overlay">
+                    Minimal
+                  </div>
+
+                </div>
 
               </div>
 
             </div>
-          </div>
+
+          </>
         )}
 
-        {/* STYLE SECTION */}
-        {!isLogin && (
-          <div className="style-section">
+        {/* ========================= */}
+        {/* ĐÃ ĐĂNG NHẬP */}
+        {/* ========================= */}
 
-            <div className="section-header">
+        {isLogin && (
 
-              <h2>Khám phá phong cách</h2>
+          <>
 
-              <span>
-                Xem tất cả
-                <ArrowRight size={16} />
-              </span>
+            <p className="hello">
+
+              Xin chào, {user?.tenDangNhap} 👋
+
+            </p>
+
+            <h1 className="dashboard-title">
+
+              Hôm nay bạn muốn phối đồ như thế nào?
+
+            </h1>
+
+            <div className="dashboard-grid">
+
+              {/* ACTIONS */}
+              <div className="actions">
+
+                <div className="action-card">
+
+                  <div className="icon purple">
+
+                    <Sparkles size={22} />
+
+                  </div>
+
+                  <div>
+
+                    <h3>Phối đồ ngay</h3>
+
+                    <p>
+                      Nhận gợi ý outfit phù hợp với phong cách của bạn
+                    </p>
+
+                  </div>
+
+                </div>
+
+                <div className="action-card">
+
+                  <div className="icon orange">
+
+                    <Upload size={22} />
+
+                  </div>
+
+                  <div>
+
+                    <h3>Upload trang phục</h3>
+
+                    <p>
+                      Thêm trang phục vào tủ đồ của bạn
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* STATS */}
+              <div className="stats">
+
+                <div className="stat-card">
+
+                  <div className="stat-icon purple">
+
+                    <Shirt size={20} />
+
+                  </div>
+
+                  <div>
+
+                    <h3>36</h3>
+
+                    <p>Tủ đồ của bạn</p>
+
+                  </div>
+
+                </div>
+
+                <div className="stat-card">
+
+                  <div className="stat-icon yellow">
+
+                    <Heart size={20} />
+
+                  </div>
+
+                  <div>
+
+                    <h3>12</h3>
+
+                    <p>Outfit đã lưu</p>
+
+                  </div>
+
+                </div>
+
+              </div>
 
             </div>
 
-            <div className="styles">
-
-              <div className="style-card">
-                <img
-                  src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1000&auto=format&fit=crop"
-                  alt=""
-                />
-
-                <div className="style-overlay">
-                  Casual
-                </div>
-              </div>
-
-              <div className="style-card">
-                <img
-                  src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop"
-                  alt=""
-                />
-
-                <div className="style-overlay">
-                  Korean
-                </div>
-              </div>
-
-              <div className="style-card">
-                <img
-                  src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1000&auto=format&fit=crop"
-                  alt=""
-                />
-
-                <div className="style-overlay">
-                  Minimal
-                </div>
-              </div>
-
-            </div>
-          </div>
+          </>
         )}
 
         {/* SECTION */}
@@ -283,8 +414,11 @@ export default function TrangChu() {
           <h2>Gợi ý outfit dành cho bạn</h2>
 
           <span>
+
             Xem tất cả
+
             <ArrowRight size={16} />
+
           </span>
 
         </div>
@@ -293,13 +427,19 @@ export default function TrangChu() {
         <div className="outfits">
 
           {outfits.map((item, index) => (
-            <div className="outfit-card" key={index}>
+
+            <div
+              className="outfit-card"
+              key={index}
+            >
 
               <button
                 className="heart"
-                onClick={requireLogin}
+                onClick={!isLogin ? requireLogin : null}
               >
+
                 <Heart size={18} />
+
               </button>
 
               <img
@@ -329,8 +469,10 @@ export default function TrangChu() {
                 </div>
 
                 <p className="outfit-desc">
+
                   Outfit phù hợp cho phong cách{" "}
                   {item.style.toLowerCase()}
+
                 </p>
 
               </div>
@@ -342,6 +484,7 @@ export default function TrangChu() {
 
         {/* CTA */}
         {!isLogin && (
+
           <div className="cta-banner">
 
             <div>
@@ -358,13 +501,16 @@ export default function TrangChu() {
             </div>
 
             <button onClick={requireLogin}>
+
               Bắt đầu ngay
+
             </button>
 
           </div>
         )}
 
       </div>
+
     </div>
   );
 }

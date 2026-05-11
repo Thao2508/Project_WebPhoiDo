@@ -5,73 +5,141 @@ import {
   Sparkles,
   Shirt,
   Heart,
-  Clock3,
-  Palette,
-  CalendarDays,
-  Settings,
+  LogOut
 } from "lucide-react";
 
+import {Link, useNavigate, useLocation} from "react-router-dom";
+
 export default function Sidebar() {
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  // ĐĂNG XUẤT
+  const handleDangXuat = () => {
+
+    localStorage.removeItem("user");
+
+    navigate("/dangnhap");
+  };
+
   return (
+
     <div className="sidebar">
 
+      {/* LOGO */}
       <div className="logo">
+
         <Shirt size={22} />
-        <span>StyleMate</span>
+
+        <span>Outfitly</span>
+
       </div>
 
+      {/* MENU */}
       <div className="menu">
 
-        <div className="menu-item active">
-          <Home size={18} />
-          Trang chủ
+        {/* TRANG CHỦ */}
+        <Link
+            to="/"
+            className="menu-link"
+        >
+
+            <div
+            className={
+                location.pathname === "/"
+                ? "menu-item active"
+                : "menu-item"
+            }
+            >
+
+            <Home size={18} />
+
+            <span>Trang chủ</span>
+
+            </div>
+
+        </Link>
+
+        {/* PHỐI ĐỒ */}
+        <Link
+            to="/phoido"
+            className="menu-link"
+        >
+
+            <div
+            className={
+                location.pathname === "/phoido"
+                ? "menu-item active"
+                : "menu-item"
+            }
+            >
+
+            <Sparkles size={18} />
+
+            <span>Phối đồ ngay</span>
+
+            </div>
+
+        </Link>
+
+        {/* TỦ ĐỒ */}
+        <Link
+            to="/tudo"
+            className="menu-link"
+        >
+
+            <div
+            className={
+                location.pathname === "/tudo"
+                ? "menu-item active"
+                : "menu-item"
+            }
+            >
+
+            <Shirt size={18} />
+
+            <span>Tủ đồ của tôi</span>
+
+            </div>
+
+        </Link>
+
+        {/* YÊU THÍCH */}
+        <Link
+            to="/yeuthich"
+            className="menu-link"
+        >
+
+            <div
+            className={
+                location.pathname === "/yeuthich"
+                ? "menu-item active"
+                : "menu-item"
+            }
+            >
+
+            <Heart size={18} />
+
+            <span>Yêu thích</span>
+
+            </div>
+
+        </Link>
+
         </div>
 
-        <div className="menu-item">
-          <Sparkles size={18} />
-          Phối đồ ngay
-        </div>
+      {/* LOGOUT */}
+      <button
+        className="sidebar-logout"
+        onClick={handleDangXuat}
+      >
 
-        <div className="menu-item">
-          <Shirt size={18} />
-          Tủ đồ của tôi
-        </div>
+        <LogOut size={18} />
 
-        <div className="menu-item">
-          <Heart size={18} />
-          Outfit đề xuất
-        </div>
+        <span>Đăng xuất</span>
 
-        <div className="menu-item">
-          <Heart size={18} />
-          Yêu thích
-        </div>
+      </button>
 
-        <div className="menu-item">
-          <Clock3 size={18} />
-          Lịch sử phối đồ
-        </div>
-
-        <div className="divider"></div>
-
-        <div className="menu-item">
-          <Palette size={18} />
-          Phong cách
-        </div>
-
-        <div className="menu-item">
-          <CalendarDays size={18} />
-          Dịp sử dụng
-        </div>
-
-        <div className="divider"></div>
-
-        <div className="menu-item">
-          <Settings size={18} />
-          Cài đặt
-        </div>
-
-      </div>
     </div>
   );
 }
