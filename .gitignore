@@ -1,0 +1,14 @@
+# Chặn thư mục thư viện (Rất quan quan trọng)
+node_modules/
+
+# Chặn các file log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Chặn các thư mục build khi chạy thật
+dist/
+build/
+
+# Chặn file môi trường chứa mật khẩu/biến quan trọng
+.env

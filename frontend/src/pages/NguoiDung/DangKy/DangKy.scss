@@ -1,0 +1,271 @@
+/* DangKy.scss */
+
+.dk-container {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 32px;
+
+  background: #f8f6f2;
+}
+
+/* CARD */
+
+.dk-card {
+  width: 100%;
+  max-width: 1120px;
+
+  min-height: 740px;
+
+  background: white;
+
+  border-radius: 32px;
+
+  overflow: hidden;
+
+  display: grid;
+  grid-template-columns: 52% 48%;
+
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+
+/* LEFT */
+
+.dk-left {
+  position: relative;
+
+  overflow: hidden;
+}
+
+.dk-image {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.dk-overlay {
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.5),
+    rgba(0, 0, 0, 0.12)
+  );
+}
+
+/* BRAND */
+
+.dk-brand {
+  position: absolute;
+
+  left: 50px;
+  bottom: 50px;
+
+  z-index: 2;
+
+  color: white;
+}
+
+.dk-logo {
+  font-size: 48px;
+  font-weight: 700;
+
+  letter-spacing: -2px;
+}
+
+.dk-subtitle {
+  margin-top: 10px;
+
+  font-size: 18px;
+
+  opacity: 0.9;
+}
+
+.dk-fashion-text {
+  margin-top: 22px;
+
+  max-width: 420px;
+
+  font-size: 16px;
+  line-height: 1.8;
+
+  opacity: 0.9;
+}
+
+/* RIGHT */
+
+.dk-right {
+  padding: 40px 42px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* TITLE */
+
+.dk-right h2,
+.dk-desc,
+.dk-group,
+.dk-btn,
+.dk-login {
+  width: 100%;
+  max-width: 420px;
+}
+
+.dk-right h2 {
+  font-size: 38px;
+
+  color: #1f1f1f;
+
+  margin-bottom: 10px;
+
+  text-align: left;
+}
+
+.dk-desc {
+  color: #777;
+
+  font-size: 15px;
+
+  margin-bottom: 28px;
+
+  text-align: left;
+
+  line-height: 1.7;
+}
+
+/* FORM */
+
+.dk-group {
+  margin-bottom: 20px;
+}
+
+.dk-group label {
+  display: block;
+  text-align: left;
+  margin-bottom: 10px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  color: #333;
+}
+
+.dk-group input {
+  width: 100%;
+  height: 54px;
+
+  border: 1px solid #e4e4e4;
+  border-radius: 16px;
+
+  padding: 0 18px;
+
+  font-size: 15px;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.dk-group input:focus {
+  border-color: #8b5cf6;
+}
+
+/* PASSWORD */
+
+.dk-password-wrapper {
+  position: relative;
+}
+
+.dk-password-wrapper button {
+  position: absolute;
+
+  right: 16px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  border: none;
+  background: none;
+
+  cursor: pointer;
+
+  color: #777;
+}
+
+/* BUTTON */
+
+.dk-btn {
+  height: 54px;
+
+  border: none;
+  border-radius: 16px;
+
+  background: #1f1f1f;
+  color: white;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+
+  margin-top: 8px;
+}
+
+.dk-btn:hover {
+  background: black;
+
+  transform: translateY(-1px);
+}
+
+/* LOGIN */
+
+.dk-login {
+  text-align: center;
+
+  margin-top: 28px;
+
+  color: #666;
+
+  font-size: 15px;
+}
+
+.dk-login a {
+  text-decoration: none;
+}
+
+.dk-login span {
+  color: #8b5cf6;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1000px) {
+  .dk-card {
+    grid-template-columns: 1fr;
+
+    max-width: 500px;
+  }
+
+  .dk-left {
+    display: none;
+  }
+
+  .dk-right {
+    padding: 40px 28px;
+  }
+}

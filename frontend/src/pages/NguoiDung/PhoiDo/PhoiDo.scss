@@ -1,0 +1,334 @@
+/* PhoiDoNgay.scss */
+
+.phoido {
+  width: 100%;
+  min-height: 100vh;
+
+  background: #f8f6f2;
+
+  display: flex;
+}
+
+.phoido-main {
+  flex: 1;
+
+  margin-left: 230px;
+
+  padding: 30px 36px;
+}
+
+/* HEADER */
+
+.ph-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 40px;
+}
+
+.ph-subtitle {
+  color: #8b5cf6;
+
+  font-weight: 600;
+
+  margin-bottom: 10px;
+}
+
+.ph-header h1 {
+  font-size: 52px;
+
+  color: #1f1f1f;
+
+  letter-spacing: -2px;
+}
+
+.ph-btn {
+  height: 54px;
+  padding: 0 24px;
+
+  border: none;
+  border-radius: 18px;
+
+  background: #8b5cf6;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  box-shadow: 0 10px 24px rgba(139, 92, 246, 0.2);
+}
+
+/* CONTENT */
+
+.ph-content {
+  display: grid;
+
+  grid-template-columns: 360px 1fr;
+
+  gap: 26px;
+}
+
+/* LEFT */
+
+.ph-left {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.ph-card {
+  background: white;
+
+  border-radius: 28px;
+
+  padding: 24px;
+
+  border: 1px solid #ececec;
+}
+
+.ph-card h3 {
+  margin-bottom: 20px;
+
+  font-size: 18px;
+
+  color: #1f1f1f;
+}
+
+.ph-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ph-tags button {
+  padding: 10px 16px;
+
+  border-radius: 999px;
+  border: none;
+
+  background: #f3ecff;
+  color: #8b5cf6;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.ph-tags button:hover {
+  background: #8b5cf6;
+  color: white;
+}
+
+/* COLORS */
+
+.color-list {
+  display: flex;
+  gap: 14px;
+}
+
+.color-list span {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  cursor: pointer;
+
+  border: 3px solid white;
+
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.black {
+  background: #111;
+}
+
+.white {
+  background: #fff;
+  border: 1px solid #ddd !important;
+}
+
+.beige {
+  background: #d8c3a5;
+}
+
+.blue {
+  background: #7da6ff;
+}
+
+.purple {
+  background: #8b5cf6;
+}
+
+/* RIGHT */
+
+.ph-right {
+  background: white;
+
+  border-radius: 30px;
+
+  padding: 28px;
+
+  border: 1px solid #ececec;
+}
+
+/* UPLOAD */
+
+.upload-box {
+  border: 2px dashed #d9cdfc;
+
+  border-radius: 28px;
+
+  padding: 60px 30px;
+
+  text-align: center;
+
+  background: #faf8ff;
+}
+
+.upload-label {
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.upload-label svg {
+  color: #8b5cf6;
+
+  margin-bottom: 18px;
+}
+
+.upload-label h3 {
+  font-size: 24px;
+
+  color: #1f1f1f;
+
+  margin-bottom: 10px;
+}
+
+.upload-label p {
+  color: #777;
+
+  line-height: 1.7;
+}
+
+/* PREVIEW */
+
+.preview-grid {
+  margin-top: 28px;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+
+  gap: 18px;
+}
+
+.preview-item {
+  position: relative;
+
+  background: #f7f7f7;
+
+  border-radius: 24px;
+
+  overflow: hidden;
+}
+
+.preview-item img {
+  width: 100%;
+  height: 220px;
+
+  object-fit: cover;
+}
+
+.preview-item button {
+  position: absolute;
+
+  top: 12px;
+  right: 12px;
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+  border: none;
+
+  background: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+/* ACTION */
+
+.generate-btn {
+  width: 100%;
+  height: 58px;
+
+  margin-top: 32px;
+
+  border: none;
+  border-radius: 18px;
+
+  background: #1f1f1f;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1100px) {
+  .ph-content {
+    grid-template-columns: 1fr;
+  }
+
+  .phoido-main {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .ph-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    gap: 20px;
+  }
+
+  .ph-header h1 {
+    font-size: 40px;
+  }
+
+  .preview-grid {
+    grid-template-columns: 1fr;
+  }
+}
