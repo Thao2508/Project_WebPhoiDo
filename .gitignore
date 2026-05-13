@@ -1,14 +1,31 @@
-# Chặn thư mục thư viện (Rất quan quan trọng)
-node_modules/
-
-# Chặn các file log
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 
-# Chặn các thư mục build khi chạy thật
+# Thư mục thư viện (Xóa dấu / ở đầu để lọc mọi cấp độ)
+node_modules/
 dist/
-build/
+dist-ssr/
+*.local
 
-# Chặn file môi trường chứa mật khẩu/biến quan trọng
-.env
+# Editor
+.vscode/
+.idea/
+.DS_Store
+
+# Python compiled (Thêm dấu / để nhận diện thư mục)
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Python environment (Lọc mọi thư mục env/venv ở bất kỳ đâu)
+**/venv/
+**/.venv/
+**/env/
+
+# Distribution
+build/
+*.egg-info/

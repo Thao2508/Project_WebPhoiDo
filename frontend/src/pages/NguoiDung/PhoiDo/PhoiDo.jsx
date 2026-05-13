@@ -159,8 +159,7 @@ export default function PhoiDoNgay() {
             </button>
             <div className="empty-result">
             <p>
-                Hãy chọn phong cách, dịp sử dụng
-                và upload trang phục để bắt đầu phối đồ
+                Bộ phối đạt tiêu chí sẽ hiển thị ở đây
             </p>
 
             </div>

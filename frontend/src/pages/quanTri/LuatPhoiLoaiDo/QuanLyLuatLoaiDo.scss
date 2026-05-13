@@ -1,0 +1,778 @@
+.quanlyluatloai {
+
+  min-height: 100vh;
+
+  background: #f5f7fb;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.qll-main {
+
+  margin-left: 260px;
+
+  padding: 32px;
+
+  min-width: 0;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.qll-header {
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 20px;
+
+  margin-bottom: 28px;
+}
+
+.qll-header h1 {
+  font-size: 28px;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.qll-header p {
+
+  color: #6b7280;
+
+  font-size: 14px;
+}
+
+/* =========================
+   ADD BUTTON
+========================= */
+
+.add-rule-btn {
+
+  height: 48px;
+
+  padding: 0 18px;
+
+  border-radius: 14px;
+
+  background: #111827;
+
+  color: white;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  text-decoration: none;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  transition: 0.2s;
+}
+
+.add-rule-btn:hover {
+
+  background: #1f2937;
+}
+
+/* =========================
+   SEARCH
+========================= */
+
+.qll-search {
+
+  width: 340px;
+  height: 52px;
+
+  background: white;
+
+  border-radius: 16px;
+
+  border: 1px solid #e5e7eb;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 0 16px;
+
+  margin-bottom: 28px;
+}
+
+.qll-search svg {
+
+  color: #9ca3af;
+}
+
+.qll-search input {
+
+  flex: 1;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  font-size: 14px;
+}
+
+/* =========================
+   TABLE BOX
+========================= */
+
+.qll-table-box,
+.small-table-box {
+
+  background: white;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 24px;
+
+  overflow: hidden;
+}
+
+.qll-table-box {
+
+  margin-bottom: 28px;
+}
+
+/* =========================
+   TABLE HEADER
+========================= */
+
+.table-title,
+.small-header {
+
+  padding: 20px 22px;
+
+  border-bottom: 1px solid #f3f4f6;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-title h2,
+.small-header h2 {
+
+  font-size: 17px;
+
+  font-weight: 700;
+
+  color: #111827;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+.qll-table-box table,
+.small-table-box table {
+
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+.qll-table-box thead,
+.small-table-box thead {
+
+  background: #f9fafb;
+}
+
+.qll-table-box th,
+.small-table-box th {
+
+  text-align: left;
+
+  padding: 18px 22px;
+
+  color: #6b7280;
+
+  font-size: 14px;
+
+  font-weight: 600;
+}
+
+.qll-table-box td,
+.small-table-box td {
+
+  padding: 18px 22px;
+
+  border-top: 1px solid #f3f4f6;
+
+  color: #111827;
+
+  font-size: 14px;
+}
+
+/* =========================
+   TYPE
+========================= */
+
+.type-cell,
+.mini-cell {
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.type-icon {
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 10px;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* =========================
+   BADGE
+========================= */
+
+.style-badge {
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  background: #ede9fe;
+
+  color: #7c3aed;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+.status {
+
+  width: fit-content;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status.valid {
+
+  background: #dcfce7;
+
+  color: #15803d;
+}
+
+.status.invalid {
+
+  background: #fee2e2;
+
+  color: #dc2626;
+}
+
+/* =========================
+   ACTION
+========================= */
+
+.action-group {
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+/* =========================
+   BUTTON COMMON
+========================= */
+
+.icon-btn,
+.small-add-btn,
+.mini-update-btn,
+.dialog-close {
+
+  border: none;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+/* =========================
+   ICON BUTTON
+========================= */
+
+.icon-btn {
+
+  width: 40px;
+  height: 40px;
+
+  border-radius: 12px;
+}
+
+/* VIEW */
+
+.view-btn {
+
+  background: #eff6ff;
+
+  color: #2563eb;
+}
+
+.view-btn:hover {
+
+  background: #dbeafe;
+}
+
+/* UPDATE */
+
+.update-btn,
+.mini-update-btn {
+
+  background: #f3f4f6;
+
+  color: #111827;
+}
+
+.update-btn:hover,
+.mini-update-btn:hover {
+
+  background: #e5e7eb;
+}
+
+/* DELETE */
+
+.delete-btn {
+
+  background: #fee2e2;
+
+  color: #dc2626;
+}
+
+.delete-btn:hover {
+
+  background: #fecaca;
+}
+
+/* =========================
+   SMALL BUTTON
+========================= */
+
+.small-add-btn {
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 12px;
+
+  background: #111827;
+
+  color: white;
+}
+
+.small-add-btn:hover {
+
+  background: #1f2937;
+}
+
+/* =========================
+   MINI UPDATE
+========================= */
+
+.mini-update-btn {
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 10px;
+}
+
+/* =========================
+   SCROLL
+========================= */
+
+.small-scroll {
+
+  max-height: 340px;
+
+  overflow-y: auto;
+}
+
+/* =========================
+   GRID
+========================= */
+
+.bottom-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 24px;
+}
+
+/* =========================
+   DIALOG
+========================= */
+
+.dialog-overlay {
+
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(15, 23, 42, 0.45);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 999;
+}
+
+/* BOX */
+
+.dialog-box {
+
+  width: 100%;
+  max-width: 520px;
+
+  background: white;
+
+  border-radius: 28px;
+
+  padding: 32px;
+
+  position: relative;
+
+  animation: dialogShow 0.2s ease;
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+@keyframes dialogShow {
+
+  from {
+
+    opacity: 0;
+
+    transform:
+      translateY(10px)
+      scale(0.98);
+  }
+
+  to {
+
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+/* =========================
+   CLOSE
+========================= */
+
+.dialog-close {
+
+  position: absolute;
+
+  top: 18px;
+  right: 18px;
+
+  width: 40px;
+  height: 40px;
+
+  border-radius: 12px;
+
+  background: #f3f4f6;
+
+  color: #111827;
+}
+
+.dialog-close:hover {
+
+  background: #e5e7eb;
+}
+
+/* =========================
+   DIALOG TITLE
+========================= */
+
+.dialog-box h2 {
+
+  font-size: 24px;
+
+  font-weight: 700;
+
+  color: #111827;
+
+  margin-bottom: 28px;
+}
+
+/* =========================
+   DIALOG GRID
+========================= */
+
+.dialog-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 18px;
+}
+
+/* =========================
+   DIALOG CARD
+========================= */
+
+.dialog-card {
+
+  background: #f8fafc;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 20px;
+
+  padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.dialog-card span {
+
+  font-size: 13px;
+
+  color: #64748b;
+}
+
+.dialog-card strong {
+
+  font-size: 16px;
+
+  color: #111827;
+}
+
+/* =========================
+   FORM
+========================= */
+
+.update-form {
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 22px;
+}
+
+/* =========================
+   GROUP
+========================= */
+
+.update-group {
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.update-group label {
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #374151;
+}
+
+/* =========================
+   INPUT + SELECT
+========================= */
+
+.update-group input,
+.update-group select {
+
+  height: 54px;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 16px;
+
+  padding: 0 16px;
+
+  background: white;
+
+  font-size: 14px;
+
+  color: #111827;
+
+  outline: none;
+
+  transition: 0.2s;
+}
+
+.update-group input:focus,
+.update-group select:focus {
+
+  border-color: #111827;
+}
+
+.update-group select {
+
+  cursor: pointer;
+}
+
+.update-group input::placeholder {
+
+  color: #9ca3af;
+}
+
+/* =========================
+   SAVE BUTTON
+========================= */
+
+.save-btn {
+
+  height: 56px;
+
+  border: none;
+
+  border-radius: 18px;
+
+  background: #111827;
+
+  color: white;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.save-btn:hover {
+
+  background: #1f2937;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 992px) {
+
+  .qll-main {
+
+    margin-left: 90px;
+  }
+
+  .bottom-grid {
+
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .qll-main {
+
+    margin-left: 0;
+
+    padding: 20px;
+  }
+
+  .qll-header {
+
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+  .qll-search {
+
+    width: 100%;
+  }
+
+  .qll-table-box,
+  .small-table-box {
+
+    overflow-x: auto;
+  }
+
+  .qll-table-box table,
+  .small-table-box table {
+
+    min-width: 720px;
+  }
+
+  .dialog-box {
+
+    width: calc(100% - 24px);
+
+    padding: 24px;
+
+    border-radius: 22px;
+  }
+
+  .dialog-grid {
+
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-box h2 {
+
+    font-size: 20px;
+  }
+
+  .update-group input,
+  .update-group select {
+
+    height: 50px;
+  }
+
+  .save-btn {
+
+    height: 52px;
+  }
+}

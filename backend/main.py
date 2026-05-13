@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from app.db.database import Base
 from app.db.database import engine
 from app.models.NguoiDung import NguoiDung
-from app.routers.auth_routes import router as auth_router
+from app.routers.auth_route import router as auth_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()

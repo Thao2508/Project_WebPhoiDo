@@ -1,0 +1,323 @@
+.themquytacloai {
+
+  min-height: 100vh;
+
+  background: #f5f7fb;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.tqtl-main {
+
+  margin-left: 260px;
+
+  padding: 40px;
+
+  min-width: 0;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.tqtl-header {
+
+  margin-bottom: 34px;
+}
+
+/* TITLE */
+
+.tqtl-title-row {
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 18px;
+}
+
+/* =========================
+   BACK BUTTON
+========================= */
+
+.back-btn {
+
+  width: 42px;
+  height: 42px;
+
+  border-radius: 12px;
+
+  background: white;
+
+  border: 1px solid #e5e7eb;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  text-decoration: none;
+
+  color: #111827;
+
+  flex-shrink: 0;
+
+  transition: 0.2s;
+}
+
+.back-btn:hover {
+
+  background: #f9fafb;
+}
+
+/* =========================
+   HEADER TEXT
+========================= */
+
+.tqtl-header h1 {
+  font-size: 28px;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.tqtl-header p {
+
+  font-size: 14px;
+
+  color: #6b7280;
+}
+
+/* =========================
+   WRAPPER
+========================= */
+
+.tqtl-wrapper {
+
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+}
+
+/* =========================
+   FORM BOX
+========================= */
+
+.tqtl-form-box {
+
+  width: 100%;
+  max-width: 860px;
+
+  background: white;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 30px;
+
+  padding: 34px;
+
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.04);
+}
+
+/* =========================
+   FORM GRID
+========================= */
+
+.tqtl-form {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 24px;
+}
+
+/* =========================
+   GROUP
+========================= */
+
+.tqtl-group {
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.tqtl-group label {
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #374151;
+}
+
+/* FULL WIDTH */
+
+.full-width {
+
+  grid-column: 1 / -1;
+}
+
+/* =========================
+   INPUT
+========================= */
+
+.tqtl-input {
+
+  height: 56px;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 18px;
+
+  background: #fafafa;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 0 16px;
+
+  transition: 0.2s ease;
+}
+
+.tqtl-input:focus-within {
+
+  border-color: #111827;
+
+  background: white;
+}
+
+/* ICON */
+
+.tqtl-input svg {
+
+  color: #9ca3af;
+
+  flex-shrink: 0;
+}
+
+/* SELECT */
+
+.tqtl-input select {
+
+  flex: 1;
+
+  height: 100%;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  font-size: 14px;
+
+  color: #111827;
+
+  cursor: pointer;
+}
+
+/* =========================
+   BUTTON
+========================= */
+
+.tqtl-submit {
+
+  grid-column: 1 / -1;
+
+  height: 58px;
+
+  border: none;
+
+  border-radius: 18px;
+
+  background: linear-gradient(
+    135deg,
+    #020617,
+    #111827
+  );
+
+  color: white;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.25s ease;
+}
+
+.tqtl-submit:hover {
+
+  transform: translateY(-2px);
+
+  opacity: 0.96;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 992px) {
+
+  .tqtl-main {
+
+    margin-left: 90px;
+  }
+
+  .tqtl-form {
+
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .tqtl-main {
+
+    margin-left: 0;
+
+    padding: 20px;
+  }
+
+  .tqtl-title-row {
+
+    gap: 14px;
+  }
+
+  .tqtl-header h1 {
+
+    font-size: 24px;
+  }
+
+  .tqtl-form {
+
+    grid-template-columns: 1fr;
+  }
+
+  .tqtl-form-box {
+
+    padding: 24px;
+
+    border-radius: 24px;
+  }
+
+  .tqtl-input {
+
+    height: 52px;
+
+    border-radius: 16px;
+  }
+
+  .tqtl-submit {
+
+    height: 54px;
+
+    border-radius: 16px;
+  }
+}
