@@ -623,3 +623,7 @@ td {
     margin: 20px;
   }
 }
+.table-scroll {
+    max-height: 420px;
+    overflow-y: auto;
+}

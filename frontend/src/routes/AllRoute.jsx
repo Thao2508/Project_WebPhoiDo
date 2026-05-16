@@ -17,7 +17,7 @@ import QlyTaiKhoan from "../pages/quanTri/TaiKhoan/QlyTaiKhoan";
 import ThemTaiKhoan from "../pages/quanTri/TaiKhoan/ThemTaiKhoan";
 import QuanLyLuatPhoiMau from "../pages/quanTri/LuatPhoiMau/QuanLyLuatPhoiMau";
 import ThemQuyTacMau from "../pages/quanTri/LuatPhoiMau/ThemQuyTacMau";
-import QuanLyLuatLoaiDo from "../pages/quanTri/LuatPhoiLoaiDo/QuanLyLuatLoaiDo";
+import QuanLyLuatPhoiLoai from "../pages/quanTri/LuatPhoiLoaiDo/QuanLyLuatPhoiLoai";
 import ThemQuyTacLoai from "../pages/quanTri/LuatPhoiLoaiDo/ThemQuytacLoai";
 import CapNhatPhongCach from "../pages/quanTri/PhongCach/CapNhatPhongCach";
 import CapNhatDipSD from "../pages/quanTri/DipSD/CapNhatDipSD";
@@ -76,8 +76,8 @@ export default function AllRoute() {
           element={<ThemQuyTacMau />}
         />
          <Route
-          path="/quantri/luatloaido"
-          element={<QuanLyLuatLoaiDo />}
+          path="/quantri/luatphoiloai"
+          element={<QuanLyLuatPhoiLoai />}
         />
          <Route
           path="/quantri/themquytacloai"

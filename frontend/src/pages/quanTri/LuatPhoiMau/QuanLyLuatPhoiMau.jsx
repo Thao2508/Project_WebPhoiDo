@@ -8,92 +8,299 @@ import {
   Palette,
   X
 } from "lucide-react";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Link } from "react-router-dom";
-export default function QuanLyLuatPhoiMau() {
+import axios from "axios";
 
-  // DIALOG
+export default function QuanLyLuatPhoiMau() {
 
   const [openAddColor, setOpenAddColor] =
     useState(false);
 
-  // DATA MAU
+  const [colors, setColors] =
+  useState([]);
 
-  const [colors, setColors] = useState([
+  const [phongCachs, setPhongCachs] =
+  useState([]);
 
-    {
-      id: 1,
+  const [dipSuDungs, setDipSuDungs] =
+  useState([]);
 
-      tenMau: "Đen",
+  const [rules, setRules] =
+  useState([]);
 
-      hex: "#000000",
-    },
+  const [tenMau, setTenMau] =
+  useState("");
 
-    {
-      id: 2,
+  const [maHex, setMaHex] =
+  useState("");
 
-      tenMau: "Trắng",
+  const [openUpdateRule,setOpenUpdateRule]=useState(false);
 
-      hex: "#ffffff",
-    },
+  const [selectedRule,setSelectedRule]=useState(null);
 
-    {
-      id: 3,
+  const [updateData,setUpdateData]=useState({
+    maMau_1:"",
+    maMau_2:"",
+    maPhongCach:"",
+    maDipSD:"",
+    hopLe:true
+  });
 
-      tenMau: "Xanh navy",
+  useEffect(() => {
+    layDanhSachMau();
+    layDanhSachLuat();
+    layDanhSachPhongCach();
+    layDanhSachDipSD();
+  }, []);
 
-      hex: "#1e3a8a",
-    },
+  const layDanhSachMau =
+  async () => {
 
-  ]);
+    try {
 
-  // DATA LUAT
+      const response =
+        await axios.get(
+          "http://127.0.0.1:8000/mau/"
+        );
 
-  const [rules, setRules] = useState([
+      setColors(
+        response.data
+      );
 
-    {
-      id: 1,
+    } catch (error) {
 
-      mau1: "Đen",
+      console.log(error);
+    }
+  };
 
-      mau2: "Trắng",
+  const layDanhSachPhongCach =
+  async () => {
 
-      phongCach: "Minimal",
+  try {
 
-      dipSuDung: "Đi làm",
+    const response =
+      await axios.get(
+        "http://127.0.0.1:8000/phong-cach/"
+      );
 
-      hopLe: true,
-    },
+    setPhongCachs(
+      response.data
+    );
 
-    {
-      id: 2,
+  } catch (error) {
 
-      mau1: "Xanh navy",
+    console.log(error);
+  }
+};
 
-      mau2: "Be",
+  const layDanhSachDipSD =
+  async () => {
 
-      phongCach: "Casual",
+    try {
 
-      dipSuDung: "Đi chơi",
+      const response =
+        await axios.get(
+          "http://127.0.0.1:8000/dip-su-dung/"
+        );
 
-      hopLe: true,
-    },
+      setDipSuDungs(
+        response.data
+      );
 
-    {
-      id: 3,
+    } catch (error) {
 
-      mau1: "Đỏ",
+      console.log(error);
+    }
+  };
 
-      mau2: "Xanh lá",
+  const layDanhSachLuat =
+  async () => {
 
-      phongCach: "Streetwear",
+    try {
 
-      dipSuDung: "Dạo phố",
+      const response =
+        await axios.get(
+          "http://127.0.0.1:8000/luat-phoi-mau/"
+        );
 
-      hopLe: false,
-    },
+      setRules(
+        response.data
+      );
 
-  ]);
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+  const handleThemMau =
+  async () => {
+
+    try {
+
+      const response =
+        await axios.post(
+
+          "http://127.0.0.1:8000/mau/",
+
+          {
+
+            tenMau:
+              tenMau,
+
+            maMauHex:
+              maHex
+          }
+        );
+
+      // FAIL
+
+      if (
+        !response.data.success
+      ) {
+
+        alert(
+          response.data.message
+        );
+
+        return;
+      }
+
+      alert(
+        "Thêm màu thành công"
+      );
+
+      setOpenAddColor(false);
+
+      setTenMau("");
+
+      setMaHex("");
+
+      layDanhSachMau();
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+  const openUpdateDialog = (rule) => {
+
+    setSelectedRule(rule);
+
+    setUpdateData({
+
+      maMau_1: rule.maMau_1,
+
+      maMau_2: rule.maMau_2,
+
+      maPhongCach: rule.maPhongCach,
+
+      maDipSD: rule.maDipSD,
+
+      hopLe: rule.hopLe
+    });
+
+    setOpenUpdateRule(true);
+  };
+
+
+  const closeUpdateDialog=()=>{
+
+    setOpenUpdateRule(false);
+
+    setSelectedRule(null);
+
+    setUpdateData({
+      maMau_1:"",
+      maMau_2:"",
+      maPhongCach:"",
+      maDipSD:"",
+      hopLe:true
+    });
+  };
+
+    const handleChange=(field,value)=>{
+
+      setUpdateData(prev=>({
+        ...prev,
+        [field]: field === "hopLe"? value: Number(value)
+      }));
+    };
+
+
+  const handleUpdateRule=async()=>{
+
+    try{
+
+      const payload={
+        maMau_1:Number(updateData.maMau_1),
+        maMau_2:Number(updateData.maMau_2),
+        maPhongCach:Number(updateData.maPhongCach),
+        maDipSD:Number(updateData.maDipSD),
+        hopLe:updateData.hopLe
+      };
+
+      const response=await axios.put(
+        `http://127.0.0.1:8000/luat-phoi-mau/${selectedRule.maLuatMau}`,
+        payload
+      );
+
+      if(!response.data.success){
+        alert(response.data.message);
+        return;
+      }
+
+      alert("Cập nhật thành công");
+
+      closeUpdateDialog();
+
+      layDanhSachLuat();
+
+    }catch(error){
+
+      console.log(error);
+
+      alert("Cập nhật thất bại");
+    }
+  };
+
+  const handleDeleteRule = async(id)=>{
+
+  const confirmDelete = window.confirm(
+      "Bạn có chắc muốn xóa?"
+    );
+
+    if(!confirmDelete){
+      return;
+    }
+
+    try{
+
+      const response = await axios.delete(
+        `http://127.0.0.1:8000/luat-phoi-mau/${id}`
+      );
+
+      if(!response.data.success){
+
+        alert("Xóa thất bại");
+
+        return;
+      }
+
+      alert("Xóa thành công");
+
+      layDanhSachLuat();
+
+    }catch(error){
+
+      console.log(error);
+
+      alert("Xóa thất bại");
+    }
+  };
+
 
   return (
 
@@ -153,6 +360,8 @@ export default function QuanLyLuatPhoiMau() {
 
             <div className="color-table-box">
 
+            <div className="table-scroll"> 
+
             <table>
 
                 <thead>
@@ -174,7 +383,7 @@ export default function QuanLyLuatPhoiMau() {
                 {
                     colors.map((color) => (
 
-                    <tr key={color.id}>
+                    <tr key={color.maMau}>
 
                         {/* PREVIEW */}
 
@@ -183,7 +392,7 @@ export default function QuanLyLuatPhoiMau() {
                         <div
                             className="table-preview-color"
                             style={{
-                            background: color.hex
+                            background: color.maMauHex
                             }}
                         ></div>
 
@@ -203,7 +412,7 @@ export default function QuanLyLuatPhoiMau() {
 
                         <span className="hex-code">
 
-                            {color.hex}
+                            {color.maMauHex}
 
                         </span>
 
@@ -217,6 +426,7 @@ export default function QuanLyLuatPhoiMau() {
                 </tbody>
 
             </table>
+            </div>
 
             </div>
 
@@ -258,6 +468,7 @@ export default function QuanLyLuatPhoiMau() {
         {/* TABLE */}
 
         <div className="qlm-table-box">
+          <div className="table-scroll"> 
 
           <table>
 
@@ -286,7 +497,7 @@ export default function QuanLyLuatPhoiMau() {
               {
                 rules.map((rule) => (
 
-                  <tr key={rule.id}>
+                  <tr key={rule.maLuatMau}>
 
                     {/* MAU 1 */}
 
@@ -294,10 +505,12 @@ export default function QuanLyLuatPhoiMau() {
 
                       <div className="table-color">
 
-                        <div className="color-dot"></div>
+                        <div className="color-dot"
+                            style={{background: rule.maMauHex1 || "#ccc"}}>
+                        </div>
 
                         <span>
-                          {rule.mau1}
+                          {rule.tenMau1}
                         </span>
 
                       </div>
@@ -310,10 +523,12 @@ export default function QuanLyLuatPhoiMau() {
 
                       <div className="table-color">
 
-                        <div className="color-dot"></div>
+                        <div className="color-dot" 
+                        style={{ background: rule.maMauHex2 || "#ccc"}}>
+                        </div>
 
                         <span>
-                          {rule.mau2}
+                          {rule.tenMau2}
                         </span>
 
                       </div>
@@ -326,7 +541,7 @@ export default function QuanLyLuatPhoiMau() {
 
                       <span className="style-tag">
 
-                        {rule.phongCach}
+                        {rule.tenPhongCach}
 
                       </span>
 
@@ -336,7 +551,7 @@ export default function QuanLyLuatPhoiMau() {
 
                     <td>
 
-                      {rule.dipSuDung}
+                      {rule.tenDipSD}
 
                     </td>
 
@@ -376,6 +591,10 @@ export default function QuanLyLuatPhoiMau() {
 
                         <button
                           className="icon-btn update-btn"
+
+                          onClick={() =>
+                            openUpdateDialog(rule)
+                          }
                         >
 
                           <Pencil size={17} />
@@ -386,6 +605,10 @@ export default function QuanLyLuatPhoiMau() {
 
                         <button
                           className="icon-btn delete-btn"
+
+                          onClick={()=>
+                            handleDeleteRule(rule.maLuatMau)
+                          }
                         >
 
                           <Trash2 size={17} />
@@ -404,6 +627,7 @@ export default function QuanLyLuatPhoiMau() {
             </tbody>
 
           </table>
+          </div>
 
         </div>
 
@@ -458,6 +682,14 @@ export default function QuanLyLuatPhoiMau() {
                   <input
                     type="text"
                     placeholder="Ví dụ: Xanh pastel"
+
+                    value={tenMau}
+
+                    onChange={(e) =>
+                      setTenMau(
+                        e.target.value
+                      )
+                    }
                   />
 
                 </div>
@@ -473,16 +705,24 @@ export default function QuanLyLuatPhoiMau() {
                   <input
                     type="text"
                     placeholder="#A5B4FC"
+
+                    value={maHex}
+
+                    onChange={(e) =>
+                      setMaHex(
+                        e.target.value
+                      )
+                    }
                   />
 
                 </div>
 
                 {/* BUTTON */}
 
-                <button className="save-btn">
-
+                <button
+                  className="save-btn"
+                  onClick={handleThemMau}>
                   Thêm màu
-
                 </button>
 
               </div>
@@ -494,6 +734,233 @@ export default function QuanLyLuatPhoiMau() {
         )
       }
 
+      {
+      openUpdateRule && selectedRule && (
+
+      <div
+        className="dialog-overlay"
+        onClick={closeUpdateDialog}
+      >
+
+        <div
+          className="dialog-box update-rule-dialog"
+          onClick={(e)=>e.stopPropagation()}
+        >
+
+          {/* CLOSE */}
+
+          <button
+            className="dialog-close"
+            onClick={closeUpdateDialog}
+          >
+
+            <X size={18}/>
+
+          </button>
+
+          <h2>
+            Cập nhật quy tắc phối màu
+          </h2>
+
+          <div className="dialog-form">
+
+            {/* MAU 1 */}
+
+            <div className="dialog-group">
+
+              <label>
+                Màu thứ nhất
+              </label>
+
+              <select
+                value={updateData.maMau_1}
+
+                onChange={(e)=>
+                  handleChange(
+                    "maMau_1",
+                    e.target.value
+                  )
+                }
+              >
+
+                {
+                  colors.map(item=>(
+
+                    <option
+                      key={item.maMau}
+                      value={item.maMau}
+                    >
+
+                      {item.tenMau}
+
+                    </option>
+                  ))
+                }
+
+              </select>
+
+            </div>
+
+            {/* MAU 2 */}
+
+            <div className="dialog-group">
+
+              <label>
+                Màu thứ hai
+              </label>
+
+              <select
+                value={updateData.maMau_2}
+
+                onChange={(e)=>
+                  handleChange(
+                    "maMau_2",
+                    e.target.value
+                  )
+                }
+              >
+
+                {
+                  colors.map(item=>(
+
+                    <option
+                      key={item.maMau}
+                      value={item.maMau}
+                    >
+
+                      {item.tenMau}
+
+                    </option>
+                  ))
+                }
+
+              </select>
+
+            </div>
+
+            {/* PHONG CACH */}
+
+            <div className="dialog-group">
+
+              <label>
+                Phong cách
+              </label>
+
+              <select
+                value={updateData.maPhongCach}
+
+                onChange={(e)=>
+                  handleChange(
+                    "maPhongCach",
+                    e.target.value
+                  )
+                }
+              >
+
+                {
+                  phongCachs.map(item=>(
+
+                    <option
+                      key={item.maPhongCach}
+                      value={item.maPhongCach}
+                    >
+
+                      {item.tenPhongCach}
+
+                    </option>
+                  ))
+                }
+
+              </select>
+
+            </div>
+
+            {/* DIP */}
+
+            <div className="dialog-group">
+
+              <label>
+                Dịp sử dụng
+              </label>
+
+              <select
+                value={updateData.maDipSD}
+
+                onChange={(e)=>
+                  handleChange(
+                    "maDipSD",
+                    e.target.value
+                  )
+                }
+              >
+
+                {
+                  dipSuDungs.map(item=>(
+
+                    <option
+                      key={item.maDipSD}
+                      value={item.maDipSD}
+                    >
+
+                      {item.tenDipSD}
+
+                    </option>
+                  ))
+                }
+
+              </select>
+
+            </div>
+
+            {/* STATUS */}
+
+            <div className="dialog-group">
+
+              <label>
+                Trạng thái
+              </label>
+
+              <select
+                value={String(updateData.hopLe)}
+
+                onChange={(e)=>
+                  handleChange(
+                    "hopLe",
+                    e.target.value==="true"
+                  )
+                }
+              >
+
+                <option value="true">
+                  Hợp lệ
+                </option>
+
+                <option value="false">
+                  Không hợp
+                </option>
+
+              </select>
+
+            </div>
+
+            {/* BUTTON */}
+
+            <button
+              className="save-btn"
+              onClick={handleUpdateRule}
+            >
+
+              Cập nhật quy tắc
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+      )}
+    
     </div>
   );
 }

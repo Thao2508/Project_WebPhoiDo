@@ -16,11 +16,15 @@ import {
   X
 } from "lucide-react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import axios from "axios";
 
 export default function QuanLyTaiKhoan() {
 
-  // DIALOG
+  // =========================
+  // STATE
+  // =========================
 
   const [openView, setOpenView] =
     useState(false);
@@ -31,70 +35,127 @@ export default function QuanLyTaiKhoan() {
   const [selectedUser, setSelectedUser] =
     useState(null);
 
-  // DATA
+  const [users, setUsers] =
+    useState([]);
 
-  const [users, setUsers] = useState([
+  const [keyword, setKeyword] =
+  useState("");
+  
+  const [updateData, setUpdateData] =
+    useState({
 
-    {
-      id: 1,
+      tenDangNhap: "",
 
-      tenDangNhap: "admin",
+      email: "",
 
-      email: "admin@gmail.com",
+      gioiTinh: 1,
 
-      vaiTro: "Quản trị viên",
+      ngaySinh: "",
 
-      trangThai: true,
-    },
+      vaiTro: 0,
 
-    {
-      id: 2,
+      matKhau: ""
+    });
 
-      tenDangNhap: "thaonguyen",
 
-      email: "thao@gmail.com",
+  useEffect(() => {
 
-      vaiTro: "Người dùng",
+    layDanhSachTaiKhoan();
 
-      trangThai: true,
-    },
+  }, []);
 
-    {
-      id: 3,
+  // =========================
+  // GET ALL USER
+  // =========================
 
-      tenDangNhap: "user01",
+  const layDanhSachTaiKhoan =
+    async () => {
 
-      email: "user01@gmail.com",
+      try {
 
-      vaiTro: "Người dùng",
+        const response =
+          await axios.get(
+            "http://127.0.0.1:8000/nguoi-dung/"
+          );
 
-      trangThai: false,
-    },
+        setUsers(response.data);
 
-  ]);
+      } catch (error) {
 
+        console.log(error);
+
+      }
+    };
+
+  // =========================
+  // SEARCH
+  // =========================
+
+  const handleSearch =
+    async (value) => {
+
+      setKeyword(value);
+
+      try {
+
+        // Nếu ô search rỗng
+        // load lại toàn bộ
+
+        if (value.trim() === "") {
+
+          layDanhSachTaiKhoan();
+
+          return;
+        }
+
+        const response =
+          await axios.get(
+            `http://127.0.0.1:8000/nguoi-dung/search/${value}`
+          );
+
+        setUsers(response.data);
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+    };
+
+  // =========================
   // KHÓA / MỞ KHÓA
+  // =========================
 
-  const handleToggleStatus = (id) => {
+  const handleToggleStatus =
+    async (user) => {
 
-    setUsers(
+      try {
 
-      users.map((user) =>
+        if (user.trangThai) {
 
-        user.id === id
+          await axios.put(
+            `http://127.0.0.1:8000/nguoi-dung/khoa/${user.maNguoiDung}`
+          );
 
-          ? {
-              ...user,
-              trangThai:
-                !user.trangThai,
-            }
+        } else {
 
-          : user
-      )
-    );
-  };
+          await axios.put(
+            `http://127.0.0.1:8000/nguoi-dung/mo-khoa/${user.maNguoiDung}`
+          );
+        }
 
+        layDanhSachTaiKhoan();
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+    };
+
+  // =========================
   // VIEW
+  // =========================
 
   const handleView = (user) => {
 
@@ -103,24 +164,89 @@ export default function QuanLyTaiKhoan() {
     setOpenView(true);
   };
 
-  // UPDATE
-
   const handleUpdate = (user) => {
 
     setSelectedUser(user);
 
+    setUpdateData({
+
+      tenDangNhap:
+        user.tenDangNhap,
+
+      email:
+        user.email,
+
+      gioiTinh:
+        user.gioiTinh ?? 1,
+
+      ngaySinh:
+        user.ngaySinh ?? "",
+
+      vaiTro:
+        user.vaiTro,
+
+      matKhau: ""
+    });
+
     setOpenUpdate(true);
   };
 
+  const handleSaveUpdate =
+  async () => {
+
+    try {
+
+      await axios.put(
+
+        `http://127.0.0.1:8000/nguoi-dung/${selectedUser.maNguoiDung}`,
+
+        {
+
+          tenDangNhap:
+            updateData.tenDangNhap,
+
+          email:
+            updateData.email,
+
+          gioiTinh:
+            Number(updateData.gioiTinh),
+
+          ngaySinh:
+            updateData.ngaySinh,
+
+          vaiTro:
+            Number(updateData.vaiTro),
+
+          ...(updateData.matKhau && {
+
+            matKhau:
+              updateData.matKhau
+          })
+        }
+      );
+
+      alert(
+        "Cập nhật thành công"
+      );
+
+      setOpenUpdate(false);
+
+      layDanhSachTaiKhoan();
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert(
+        "Cập nhật thất bại"
+      );
+    }
+  };
   return (
 
     <div className="quanlytaikhoan">
 
-      {/* SIDEBAR */}
-
       <SideBarAdmin />
-
-      {/* MAIN */}
 
       <div className="qltk-main">
 
@@ -160,6 +286,10 @@ export default function QuanLyTaiKhoan() {
           <input
             type="text"
             placeholder="Tìm kiếm tài khoản..."
+            value={keyword}
+            onChange={(e) =>
+              handleSearch(e.target.value)
+            }
           />
 
         </div>
@@ -195,7 +325,9 @@ export default function QuanLyTaiKhoan() {
               {
                 users.map((user) => (
 
-                  <tr key={user.id}>
+                  <tr
+                    key={user.maNguoiDung}
+                  >
 
                     {/* USER */}
 
@@ -229,8 +361,7 @@ export default function QuanLyTaiKhoan() {
 
                       <div
                         className={
-                          user.vaiTro ===
-                          "Quản trị viên"
+                          user.vaiTro === 1
 
                           ? "role admin"
 
@@ -241,7 +372,15 @@ export default function QuanLyTaiKhoan() {
                         <ShieldCheck size={15} />
 
                         <span>
-                          {user.vaiTro}
+
+                          {
+                            user.vaiTro === 1
+
+                            ? "Quản trị viên"
+
+                            : "Người dùng"
+                          }
+
                         </span>
 
                       </div>
@@ -318,7 +457,7 @@ export default function QuanLyTaiKhoan() {
                           }
 
                           onClick={() =>
-                            handleToggleStatus(user.id)
+                            handleToggleStatus(user)
                           }
                         >
 
@@ -369,8 +508,6 @@ export default function QuanLyTaiKhoan() {
               }
             >
 
-              {/* CLOSE */}
-
               <button
                 className="dialog-close"
                 onClick={() =>
@@ -381,8 +518,6 @@ export default function QuanLyTaiKhoan() {
                 <X size={18} />
 
               </button>
-
-              {/* TOP */}
 
               <div className="dialog-top">
 
@@ -410,8 +545,6 @@ export default function QuanLyTaiKhoan() {
 
               </div>
 
-              {/* BODY */}
-
               <div className="dialog-grid">
 
                 <div className="dialog-card">
@@ -421,9 +554,15 @@ export default function QuanLyTaiKhoan() {
                   </span>
 
                   <strong>
+
                     {
-                      selectedUser.vaiTro
+                      selectedUser.vaiTro === 1
+
+                      ? "Quản trị viên"
+
+                      : "Người dùng"
                     }
+
                   </strong>
 
                 </div>
@@ -455,7 +594,15 @@ export default function QuanLyTaiKhoan() {
                   </span>
 
                   <strong>
-                    Nam
+
+                    {
+                      selectedUser.gioiTinh === 1
+
+                      ? "Nam"
+
+                      : "Nữ"
+                    }
+
                   </strong>
 
                 </div>
@@ -467,7 +614,11 @@ export default function QuanLyTaiKhoan() {
                   </span>
 
                   <strong>
-                    20/05/2004
+
+                    {
+                      selectedUser.ngaySinh
+                    }
+
                   </strong>
 
                 </div>
@@ -480,205 +631,267 @@ export default function QuanLyTaiKhoan() {
         )
       }
 
-      {/* UPDATE DIALOG */}
+    {
+      openUpdate &&
+      selectedUser && (
 
-      {
-        openUpdate &&
-        selectedUser && (
+        <div
+          className="dialog-overlay"
+          onClick={() =>
+            setOpenUpdate(false)
+          }
+        >
 
           <div
-            className="dialog-overlay"
-            onClick={() =>
-              setOpenUpdate(false)
+            className="dialog-box"
+            onClick={(e) =>
+              e.stopPropagation()
             }
           >
 
-            <div
-              className="dialog-box"
-              onClick={(e) =>
-                e.stopPropagation()
+            {/* CLOSE */}
+
+            <button
+              className="dialog-close"
+              onClick={() =>
+                setOpenUpdate(false)
               }
             >
 
-              {/* CLOSE */}
+              <X size={18} />
 
-              <button
-                className="dialog-close"
-                onClick={() =>
-                  setOpenUpdate(false)
-                }
-              >
+            </button>
 
-                <X size={18} />
+            {/* TITLE */}
 
-              </button>
+            <div className="dialog-top">
 
-              {/* TOP */}
+              <div className="dialog-avatar">
 
-              <div className="dialog-top">
-
-                <div className="dialog-avatar">
-
-                  <User size={32} />
-
-                </div>
-
-                <div>
-
-                  <h2>
-                    Cập nhật tài khoản
-                  </h2>
-
-                  <p>
-                    Chỉnh sửa thông tin tài khoản
-                  </p>
-
-                </div>
+                <User size={32} />
 
               </div>
 
-              {/* FORM */}
+              <div>
 
-              <div className="update-grid">
-
-                {/* USERNAME */}
-
-                <div className="update-group">
-
-                  <label>
-                    Tên đăng nhập
-                  </label>
-
-                  <input
-                    type="text"
-                    defaultValue={
-                      selectedUser.tenDangNhap
-                    }
-                  />
-
-                </div>
-
-                {/* EMAIL */}
-
-                <div className="update-group">
-
-                  <label>Email</label>
-
-                  <input
-                    type="email"
-                    defaultValue={
-                      selectedUser.email
-                    }
-                  />
-
-                </div>
-
-                {/* GENDER */}
-
-                <div className="update-group">
-
-                  <label>
-                    Giới tính
-                  </label>
-
-                  <select>
-
-                    <option>
-                      Nam
-                    </option>
-
-                    <option>
-                      Nữ
-                    </option>
-
-                  </select>
-
-                </div>
-
-                {/* BIRTHDAY */}
-
-                <div className="update-group">
-
-                  <label>
-                    Ngày sinh
-                  </label>
-
-                  <input type="date" />
-
-                </div>
-
-                {/* PASSWORD */}
-
-                <div className="update-group">
-
-                  <label>
-                    Mật khẩu mới
-                  </label>
-
-                  <input
-                    type="password"
-                    placeholder="Nhập mật khẩu mới"
-                  />
-
-                </div>
-
-                {/* CONFIRM PASSWORD */}
-
-                <div className="update-group">
-
-                  <label>
-                    Xác nhận mật khẩu
-                  </label>
-
-                  <input
-                    type="password"
-                    placeholder="Nhập lại mật khẩu"
-                  />
-
-                </div>
-                {/* ROLE */}
-
-                <div className="update-group full-width">
-
-                  <label>
-                    Vai trò
-                  </label>
-
-                  <select
-                    defaultValue={
-                      selectedUser.vaiTro
-                    }
-                  >
-
-                    <option>
-                      Người dùng
-                    </option>
-
-                    <option>
-                      Quản trị viên
-                    </option>
-
-                  </select>
-
-                </div>
+                <h2>
+                  Cập nhật tài khoản
+                </h2>
 
               </div>
-
-              {/* BUTTON */}
-
-              <button className="save-btn">
-
-                Lưu cập nhật
-
-              </button>
 
             </div>
 
+            {/* FORM */}
+
+            <div className="update-grid">
+
+              {/* USERNAME */}
+
+              <div className="update-group">
+
+                <label>
+                  Tên đăng nhập
+                </label>
+
+                <input
+                  type="text"
+
+                  value={
+                    updateData.tenDangNhap
+                  }
+
+                  onChange={(e) =>
+                    setUpdateData({
+
+                      ...updateData,
+
+                      tenDangNhap:
+                        e.target.value
+                    })
+                  }
+                />
+
+              </div>
+
+              {/* EMAIL */}
+
+              <div className="update-group">
+
+                <label>
+                  Email
+                </label>
+
+                <input
+                  type="email"
+
+                  value={
+                    updateData.email
+                  }
+
+                  onChange={(e) =>
+                    setUpdateData({
+
+                      ...updateData,
+
+                      email:
+                        e.target.value
+                    })
+                  }
+                />
+
+              </div>
+
+              {/* GENDER */}
+
+              <div className="update-group">
+
+                <label>
+                  Giới tính
+                </label>
+
+                <select
+
+                  value={
+                    updateData.gioiTinh
+                  }
+
+                  onChange={(e) =>
+                    setUpdateData({
+
+                      ...updateData,
+
+                      gioiTinh:
+                        e.target.value
+                    })
+                  }
+                >
+
+                  <option value={1}>
+                    Nam
+                  </option>
+
+                  <option value={0}>
+                    Nữ
+                  </option>
+
+                </select>
+
+              </div>
+
+              {/* BIRTHDAY */}
+
+              <div className="update-group">
+
+                <label>
+                  Ngày sinh
+                </label>
+
+                <input
+                  type="date"
+
+                  value={
+                    updateData.ngaySinh || ""
+                  }
+
+                  onChange={(e) =>
+                    setUpdateData({
+
+                      ...updateData,
+
+                      ngaySinh:
+                        e.target.value
+                    })
+                  }
+                />
+
+              </div>
+
+              {/* PASSWORD */}
+
+              <div className="update-group">
+
+                <label>
+                  Mật khẩu mới
+                </label>
+
+                <input
+                  type="password"
+
+                  placeholder="Nhập mật khẩu mới"
+
+                  onChange={(e) =>
+                    setUpdateData({
+
+                      ...updateData,
+
+                      matKhau:
+                        e.target.value
+                    })
+                  }
+                />
+
+              </div>
+
+              {/* ROLE */}
+
+              <div className="update-group">
+
+                <label>
+                  Vai trò
+                </label>
+
+                <select
+
+                  value={
+                    updateData.vaiTro
+                  }
+
+                  onChange={(e) =>
+                    setUpdateData({
+
+                      ...updateData,
+
+                      vaiTro:
+                        e.target.value
+                    })
+                  }
+                >
+
+                  <option value={0}>
+                    Người dùng
+                  </option>
+
+                  <option value={1}>
+                    Quản trị viên
+                  </option>
+
+                </select>
+
+              </div>
+
+            </div>
+
+            {/* BUTTON */}
+
+            <button
+              className="save-btn"
+
+              onClick={
+                handleSaveUpdate
+              }
+            >
+
+              Lưu cập nhật
+
+            </button>
+
           </div>
 
-        )
-      }
-
+        </div>
+      )
+    }
     </div>
   );
 }
+

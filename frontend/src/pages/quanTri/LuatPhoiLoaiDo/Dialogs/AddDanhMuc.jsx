@@ -1,9 +1,100 @@
 import { X } from "lucide-react";
 
+import {
+  useState
+} from "react";
+
+import axios from "axios";
+
 export default function AddDanhMucDialog({
   open,
   onClose,
+  reloadData
 }) {
+
+  const [formData,setFormData] =
+    useState({
+
+      tenDanhMuc:"",
+
+      phamViSuDung:""
+    });
+
+  /* CHANGE */
+
+  const handleChange =
+  (name,value)=>{
+
+    setFormData({
+
+      ...formData,
+
+      [name]:value
+    });
+  };
+
+  /* ADD */
+
+  const handleAdd =
+  async()=>{
+
+    if(
+
+      !formData.tenDanhMuc ||
+
+      !formData.phamViSuDung
+    ){
+
+      alert(
+        "Vui lòng nhập đầy đủ thông tin"
+      );
+
+      return;
+    }
+
+    try{
+
+      const response =
+        await axios.post(
+
+          "http://127.0.0.1:8000/danh-muc/",
+
+          {
+
+            tenDanhMuc:
+            formData.tenDanhMuc,
+
+            phamViSuDung:
+            formData.phamViSuDung
+          }
+        );
+
+      if(!response.data.success){
+
+        alert(
+          response.data.message
+        );
+
+        return;
+      }
+
+      alert(
+        "Thêm danh mục thành công"
+      );
+
+      reloadData();
+
+      onClose();
+
+    }catch(error){
+
+      console.log(error);
+
+      alert(
+        "Thêm danh mục thất bại"
+      );
+    }
+  };
 
   if (!open) return null;
 
@@ -21,6 +112,8 @@ export default function AddDanhMucDialog({
         }
       >
 
+        {/* CLOSE */}
+
         <button
           className="dialog-close"
           onClick={onClose}
@@ -30,11 +123,17 @@ export default function AddDanhMucDialog({
 
         </button>
 
+        {/* TITLE */}
+
         <h2>
           Thêm danh mục
         </h2>
 
+        {/* FORM */}
+
         <div className="update-form">
+
+          {/* TEN */}
 
           <div className="update-group">
 
@@ -44,10 +143,25 @@ export default function AddDanhMucDialog({
 
             <input
               type="text"
-              placeholder="Nhập tên danh mục"
+
+              placeholder=
+              "Nhập tên danh mục"
+
+              value={
+                formData.tenDanhMuc
+              }
+
+              onChange={(e)=>
+                handleChange(
+                  "tenDanhMuc",
+                  e.target.value
+                )
+              }
             />
 
           </div>
+
+          {/* PHAM VI */}
 
           <div className="update-group">
 
@@ -55,14 +169,42 @@ export default function AddDanhMucDialog({
               Phạm vi sử dụng
             </label>
 
-            <input
-              type="text"
-              placeholder="Ví dụ: Thân trên"
-            />
+            <select
+
+              value={
+                formData.phamViSuDung
+              }
+
+              onChange={(e)=>
+                handleChange(
+                  "phamViSuDung",
+                  e.target.value
+                )
+              }
+            >
+
+              <option value="">
+                Chọn phạm vi sử dụng
+              </option>
+
+              <option value="Thân trên">
+                Thân trên
+              </option>
+
+              <option value="Thân dưới">
+                Thân dưới
+              </option>
+
+            </select>
 
           </div>
 
-          <button className="save-btn">
+          {/* BUTTON */}
+
+          <button
+            className="save-btn"
+            onClick={handleAdd}
+          >
 
             Thêm danh mục
 

@@ -56,17 +56,31 @@ export default function DangNhap() {
       // ĐĂNG NHẬP THÀNH CÔNG
       if (response.data.success) {
 
-        // LƯU USER
-        localStorage.setItem(
-          "user",
-          JSON.stringify(response.data.user)
-        );
+          const user =
+            response.data.user;
 
-        alert("Đăng nhập thành công");
+          // CHẶN ADMIN
 
-        // CHUYỂN TRANG
-        navigate("/");
-      }
+          if (user.vaiTro === 1) {
+
+            alert(
+              "Vui lòng đăng nhập bằng trang quản trị"
+            );
+
+            return;
+          }
+
+          // LƯU USER
+
+          localStorage.setItem(
+            "user",
+            JSON.stringify(user)
+          );
+
+          alert("Đăng nhập thành công");
+
+          navigate("/");
+        }
 
       // THẤT BẠI
       else {

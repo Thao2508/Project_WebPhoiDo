@@ -1,6 +1,7 @@
 import "./CapNhatPhongCach.scss";
 import Sidebar from "../../../components/SideBar/SideBarAdmin";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Plus,
   Pencil,
@@ -13,29 +14,38 @@ export default function CapNhatPhongCach() {
   const [openDialog, setOpenDialog] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
 
-  const [phongCachList, setPhongCachList] = useState([
-    {
-      id: 1,
-      tenPhongCach: "Casual",
-      moTa: "Phong cách đơn giản, thoải mái"
-    },
-    {
-      id: 2,
-      tenPhongCach: "Streetwear",
-      moTa: "Phong cách trẻ trung, năng động"
-    },
-    {
-      id: 3,
-      tenPhongCach: "Minimalist",
-      moTa: "Phong cách tối giản"
-    }
-  ]);
+  const [phongCachList, setPhongCachList] = useState([]);
 
   const [formData, setFormData] = useState({
     id: null,
     tenPhongCach: "",
     moTa: ""
   });
+
+  useEffect(() => {
+
+  layDanhSachPhongCach();
+
+  }, []);
+
+  const layDanhSachPhongCach = async () => {
+
+    try {
+
+      const response =
+        await axios.get(
+          "http://127.0.0.1:8000/phong-cach/"
+        );
+
+      setPhongCachList(
+        response.data
+      );
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
 
   // Mở dialog thêm
   const handleOpenAdd = () => {
@@ -50,14 +60,28 @@ export default function CapNhatPhongCach() {
     setOpenDialog(true);
   };
 
-  // Mở dialog cập nhật
-  const handleOpenEdit = (item) => {
+
+  const handleOpenEdit = async (id) => {
+  try {
+
+    const response =
+      await axios.get(
+        `http://127.0.0.1:8000/phong-cach/${id}`
+      );
+
     setIsEdit(true);
 
-    setFormData(item);
+    setFormData(
+      response.data
+    );
 
     setOpenDialog(true);
-  };
+
+  } catch (error) {
+
+    console.log(error);
+  }
+};
 
   // Đóng dialog
   const handleCloseDialog = () => {
@@ -72,34 +96,95 @@ export default function CapNhatPhongCach() {
     });
   };
 
-  // Lưu dữ liệu
-  const handleSave = () => {
+  
+  const handleSave = async () => {
 
-    if (!formData.tenPhongCach.trim()) {
-      alert("Vui lòng nhập tên phong cách");
-      return;
-    }
+  if (!formData.tenPhongCach.trim()) {
+
+    alert("Vui lòng nhập tên phong cách");
+
+    return;
+  }
+
+  try {
+
+    // UPDATE
 
     if (isEdit) {
 
-      const updatedList = phongCachList.map((item) =>
-        item.id === formData.id ? formData : item
+      const response =
+        await axios.put(
+
+          `http://127.0.0.1:8000/phong-cach/${formData.maPhongCach}`,
+
+          {
+
+            tenPhongCach:
+              formData.tenPhongCach,
+
+            moTa:
+              formData.moTa
+          }
+        );
+
+      if (!response.data.success) {
+
+        alert(
+          response.data.message
+        );
+
+        return;
+      }
+
+      alert(
+        "Cập nhật thành công"
       );
+    }
 
-      setPhongCachList(updatedList);
+    // CREATE
 
-    } else {
+    else {
 
-      const newPhongCach = {
-        ...formData,
-        id: Date.now()
-      };
+      const response =
+        await axios.post(
 
-      setPhongCachList([...phongCachList, newPhongCach]);
+          "http://127.0.0.1:8000/phong-cach/",
+
+          {
+
+            tenPhongCach:
+              formData.tenPhongCach,
+
+            moTa:
+              formData.moTa
+          }
+        );
+
+      if (!response.data.success) {
+
+        alert(
+          response.data.message
+        );
+
+        return;
+      }
+
+      alert(
+        "Thêm thành công"
+      );
     }
 
     setOpenDialog(false);
-  };
+
+    layDanhSachPhongCach();
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert("Có lỗi xảy ra");
+  }
+};
 
   // // Xóa
   // const handleDelete = (id) => {
@@ -154,9 +239,9 @@ export default function CapNhatPhongCach() {
             <tbody>
 
               {phongCachList.map((item) => (
-                <tr key={item.id}>
+                <tr key={item.maPhongCach}>
 
-                  <td>{item.id}</td>
+                  <td>{item.maPhongCach}</td>
 
                   <td>{item.tenPhongCach}</td>
 
@@ -168,7 +253,7 @@ export default function CapNhatPhongCach() {
                       <button
                         className="edit-btn"
                         onClick={() =>
-                          handleOpenEdit(item)
+                          handleOpenEdit(item.maPhongCach)
                         }
                       >
                         <Pencil size={18} />

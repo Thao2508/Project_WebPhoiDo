@@ -4,7 +4,8 @@ import {
   XCircle,
   Shirt,
   Sparkles,
-  CalendarDays
+  CalendarDays,
+  PersonStanding
 } from "lucide-react";
 
 export default function ViewRuleDialog({
@@ -23,8 +24,8 @@ export default function ViewRuleDialog({
     >
 
       <div
-        className="dialog-box"
-        onClick={(e) =>
+        className="dialog-box large"
+        onClick={(e)=>
           e.stopPropagation()
         }
       >
@@ -59,13 +60,13 @@ export default function ViewRuleDialog({
               <Shirt size={16} />
 
               <span>
-                Loại trang phục 1
+                Trang phục thân trên
               </span>
 
             </div>
 
             <strong>
-              {rule.loai1}
+              {rule.tenLoai1}
             </strong>
 
           </div>
@@ -76,21 +77,21 @@ export default function ViewRuleDialog({
 
             <div className="dialog-card-label">
 
-              <Shirt size={16} />
+              <PersonStanding size={16} />
 
               <span>
-                Loại trang phục 2
+                Trang phục thân dưới
               </span>
 
             </div>
 
             <strong>
-              {rule.loai2}
+              {rule.tenLoai2}
             </strong>
 
           </div>
 
-          {/* PHONG CACH */}
+          {/* PHONG CÁCH */}
 
           <div className="dialog-card">
 
@@ -105,12 +106,12 @@ export default function ViewRuleDialog({
             </div>
 
             <strong>
-              {rule.phongCach}
+              {rule.tenPhongCach}
             </strong>
 
           </div>
 
-          {/* DIP */}
+          {/* DỊP */}
 
           <div className="dialog-card">
 
@@ -125,7 +126,7 @@ export default function ViewRuleDialog({
             </div>
 
             <strong>
-              {rule.dipSuDung}
+              {rule.tenDipSD}
             </strong>
 
           </div>

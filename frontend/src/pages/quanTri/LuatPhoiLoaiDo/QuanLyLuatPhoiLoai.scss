@@ -478,6 +478,7 @@
   animation: dialogShow 0.2s ease;
 }
 
+
 /* =========================
    ANIMATION
 ========================= */
@@ -699,6 +700,55 @@
 /* =========================
    RESPONSIVE
 ========================= */
+
+/* =========================
+   TABLE SCROLL
+========================= */
+
+.table-scroll {
+
+  max-height: 420px;
+
+  overflow-y: auto;
+}
+
+/* STICKY HEADER */
+
+.table-scroll thead {
+
+  position: sticky;
+
+  top: 0;
+
+  z-index: 10;
+
+  background: #f9fafb;
+}
+
+/* SMALL SCROLL */
+
+.small-scroll {
+
+  max-height: 340px;
+
+  overflow-y: auto;
+}
+
+/* SCROLLBAR */
+
+.table-scroll::-webkit-scrollbar,
+.small-scroll::-webkit-scrollbar {
+
+  width: 8px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb,
+.small-scroll::-webkit-scrollbar-thumb {
+
+  background: #d1d5db;
+
+  border-radius: 999px;
+}
 
 @media (max-width: 992px) {
 

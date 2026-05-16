@@ -8,22 +8,213 @@ import {
   Sparkles,
   CalendarDays,
   CheckCircle2,
-    PersonStanding
+  PersonStanding
 } from "lucide-react";
 
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
+
+import {
+  useEffect,
+  useState
+} from "react";
+
+import axios from "axios";
 
 export default function ThemQuyTacLoai() {
+
+  const navigate = useNavigate();
+
+  /* DATA */
+
+  const [loais,setLoais] =
+    useState([]);
+
+  const [phongCachs,setPhongCachs] =
+    useState([]);
+
+  const [dipSuDungs,setDipSuDungs] =
+    useState([]);
+
+  /* FORM */
+
+  const [formData,setFormData] =
+    useState({
+
+      maLoai_1:"",
+
+      maLoai_2:"",
+
+      maPhongCach:"",
+
+      maDipSD:"",
+
+      hopLe:true
+    });
+    const loaiThanTren =
+    loais.filter(item =>
+
+      item.phamViSuDung
+      ?.toLowerCase()
+      .includes("thân trên")
+    );
+
+    const loaiThanDuoi =
+      loais.filter(item =>
+
+        item.phamViSuDung
+        ?.toLowerCase()
+        .includes("thân dưới")
+      );
+
+  /* LOAD */
+
+  useEffect(()=>{
+
+    layLoai();
+
+    layPhongCach();
+
+    layDipSuDung();
+
+  },[]);
+
+  /* API */
+
+  const layLoai =
+  async()=>{
+
+    try{
+
+      const response =
+        await axios.get(
+          "http://127.0.0.1:8000/loai-trang-phuc/"
+        );
+
+      setLoais(
+        response.data
+      );
+
+    }catch(error){
+
+      console.log(error);
+    }
+  };
+
+  const layPhongCach =
+  async()=>{
+
+    try{
+
+      const response =
+        await axios.get(
+          "http://127.0.0.1:8000/phong-cach/"
+        );
+
+      setPhongCachs(
+        response.data
+      );
+
+    }catch(error){
+
+      console.log(error);
+    }
+  };
+
+  const layDipSuDung =
+  async()=>{
+
+    try{
+
+      const response =
+        await axios.get(
+          "http://127.0.0.1:8000/dip-su-dung/"
+        );
+
+      setDipSuDungs(
+        response.data
+      );
+
+    }catch(error){
+
+      console.log(error);
+    }
+  };
+
+  /* CHANGE */
+
+  const handleChange = (name,value)=>{
+
+    setFormData({
+
+      ...formData,
+
+      [name]:value
+    });
+  };
+
+  /* SUBMIT */
+
+  const handleSubmit =
+  async()=>{
+
+    try{
+
+      const response =
+        await axios.post(
+
+          "http://127.0.0.1:8000/luat-phoi-loai/",
+
+          {
+
+            maLoai_1:
+            Number(formData.maLoai_1),
+
+            maLoai_2:
+            Number(formData.maLoai_2),
+
+            maPhongCach:
+            Number(formData.maPhongCach),
+
+            maDipSD:
+            Number(formData.maDipSD),
+
+            hopLe:
+            formData.hopLe
+          }
+        );
+
+      if(!response.data.success){
+
+        alert(
+          response.data.message
+        );
+
+        return;
+      }
+
+      alert(
+        "Thêm quy tắc thành công"
+      );
+
+      navigate(
+        "/quantri/luatphoiloai"
+      );
+
+    }catch(error){
+
+      console.log(error);
+
+      alert(
+        "Thêm thất bại"
+      );
+    }
+  };
 
   return (
 
     <div className="themquytacloai">
 
-      {/* SIDEBAR */}
-
       <SideBarAdmin />
-
-      {/* MAIN */}
 
       <div className="tqtl-main">
 
@@ -33,18 +224,14 @@ export default function ThemQuyTacLoai() {
 
           <div className="tqtl-title-row">
 
-            {/* BACK */}
-
             <Link
-              to="/quantri/luatloaido"
+              to="/quantri/luatphoiloai"
               className="back-btn"
             >
 
               <ArrowLeft size={20} />
 
             </Link>
-
-            {/* TEXT */}
 
             <div>
 
@@ -71,26 +258,41 @@ export default function ThemQuyTacLoai() {
               <div className="tqtl-group">
 
                 <label>
-                  Loại trang phục 1
+                  Loại trang phục (thân trên)
                 </label>
 
                 <div className="tqtl-input">
 
                   <Shirt size={18} />
 
-                  <select>
+                  <select
+                    value={formData.maLoai_1}
 
-                    <option>
-                      Áo thun
+                    onChange={(e)=>
+                      handleChange(
+                        "maLoai_1",
+                        e.target.value
+                      )
+                    }
+                  >
+
+                    <option value="">
+                      Chọn loại
                     </option>
 
-                    <option>
-                      Áo sơ mi
-                    </option>
+                    {
+                      loaiThanTren.map(item=>(
 
-                    <option>
-                      Hoodie
-                    </option>
+                        <option
+                          key={item.maLoai}
+                          value={item.maLoai}
+                        >
+
+                          {item.tenLoai}
+
+                        </option>
+                      ))
+                    }
 
                   </select>
 
@@ -103,26 +305,41 @@ export default function ThemQuyTacLoai() {
               <div className="tqtl-group">
 
                 <label>
-                  Loại trang phục 2
+                  Loại trang phục (thân dưới)
                 </label>
 
                 <div className="tqtl-input">
 
-                  <  PersonStanding size={18} />
+                  <PersonStanding size={18} />
 
-                  <select>
+                  <select
+                    value={formData.maLoai_2}
 
-                    <option>
-                      Quần jean
+                    onChange={(e)=>
+                      handleChange(
+                        "maLoai_2",
+                        e.target.value
+                      )
+                    }
+                  >
+
+                    <option value="">
+                      Chọn loại
                     </option>
 
-                    <option>
-                      Quần short
-                    </option>
+                    {
+                      loaiThanDuoi.map(item=>(
 
-                    <option>
-                      Quần tây
-                    </option>
+                        <option
+                          key={item.maLoai}
+                          value={item.maLoai}
+                        >
+
+                          {item.tenLoai}
+
+                        </option>
+                      ))
+                    }
 
                   </select>
 
@@ -142,19 +359,34 @@ export default function ThemQuyTacLoai() {
 
                   <Sparkles size={18} />
 
-                  <select>
+                  <select
+                    value={formData.maPhongCach}
 
-                    <option>
-                      Casual
+                    onChange={(e)=>
+                      handleChange(
+                        "maPhongCach",
+                        e.target.value
+                      )
+                    }
+                  >
+
+                    <option value="">
+                      Chọn phong cách
                     </option>
 
-                    <option>
-                      Streetwear
-                    </option>
+                    {
+                      phongCachs.map(item=>(
 
-                    <option>
-                      Formal
-                    </option>
+                        <option
+                          key={item.maPhongCach}
+                          value={item.maPhongCach}
+                        >
+
+                          {item.tenPhongCach}
+
+                        </option>
+                      ))
+                    }
 
                   </select>
 
@@ -174,19 +406,34 @@ export default function ThemQuyTacLoai() {
 
                   <CalendarDays size={18} />
 
-                  <select>
+                  <select
+                    value={formData.maDipSD}
 
-                    <option>
-                      Đi làm
+                    onChange={(e)=>
+                      handleChange(
+                        "maDipSD",
+                        e.target.value
+                      )
+                    }
+                  >
+
+                    <option value="">
+                      Chọn dịp sử dụng
                     </option>
 
-                    <option>
-                      Đi chơi
-                    </option>
+                    {
+                      dipSuDungs.map(item=>(
 
-                    <option>
-                      Dạo phố
-                    </option>
+                        <option
+                          key={item.maDipSD}
+                          value={item.maDipSD}
+                        >
+
+                          {item.tenDipSD}
+
+                        </option>
+                      ))
+                    }
 
                   </select>
 
@@ -206,7 +453,16 @@ export default function ThemQuyTacLoai() {
 
                   <CheckCircle2 size={18} />
 
-                  <select>
+                  <select
+                    value={String(formData.hopLe)}
+
+                    onChange={(e)=>
+                      handleChange(
+                        "hopLe",
+                        e.target.value==="true"
+                      )
+                    }
+                  >
 
                     <option value="true">
                       Hợp lệ
@@ -224,9 +480,12 @@ export default function ThemQuyTacLoai() {
 
               {/* BUTTON */}
 
-              <button className="tqtl-submit">
+              <button
+                className="tqtl-submit"
+                onClick={handleSubmit}
+              >
 
-                Thêm 
+                Thêm
 
               </button>
 

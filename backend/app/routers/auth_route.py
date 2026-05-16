@@ -3,7 +3,7 @@ from fastapi import Depends
 
 from sqlalchemy.orm import Session
 
-from app.schemas.auth_schemas import DangNhapRequest
+from app.schemas.auth_schema import DangNhapRequest
 
 from app.services.auth_service import dang_nhap_service
 
@@ -12,6 +12,7 @@ from app.db.database import SessionLocal
 router = APIRouter()
 
 # DATABASE
+
 def get_db():
 
     db = SessionLocal()
@@ -23,7 +24,9 @@ def get_db():
         db.close()
 
 # DANG NHAP
+
 @router.post("/dangnhap")
+
 def dang_nhap(
     request: DangNhapRequest,
     db: Session = Depends(get_db)
@@ -36,6 +39,7 @@ def dang_nhap(
     )
 
     # KHONG TIM THAY USER
+
     if not user:
 
         return {
@@ -43,15 +47,8 @@ def dang_nhap(
             "message": "Sai email hoặc mật khẩu"
         }
 
-    # ADMIN KHONG DUOC LOGIN USER
-    if user.vaiTro == 1:
-
-        return {
-            "success": False,
-            "message": "Tài khoản admin không thể đăng nhập trang người dùng"
-        }
-
     # DANG NHAP THANH CONG
+
     return {
 
         "success": True,
@@ -60,12 +57,16 @@ def dang_nhap(
 
         "user": {
 
-            "maNguoiDung": user.maNguoiDung,
+            "maNguoiDung":
+            user.maNguoiDung,
 
-            "tenDangNhap": user.tenDangNhap,
+            "tenDangNhap":
+            user.tenDangNhap,
 
-            "email": user.email,
+            "email":
+            user.email,
 
-            "vaiTro": user.vaiTro
+            "vaiTro":
+            user.vaiTro
         }
     }

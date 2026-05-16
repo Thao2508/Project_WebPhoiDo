@@ -44,14 +44,29 @@ export default function DangNhapAdmin() {
 
       if (data.success) {
 
+
+
+      if (data.user.vaiTro === 1) {
+
         localStorage.setItem(
           "admin",
-          JSON.stringify(data.admin)
+          JSON.stringify(data.user)
         );
 
         navigate("/quantri/taikhoan");
 
       }
+
+
+      else {
+
+        alert(
+          "Tài khoản người dùng không thể đăng nhập admin"
+        );
+
+      }
+
+    }
 
       // FAILED
 
@@ -78,7 +93,7 @@ export default function DangNhapAdmin() {
       <div className="form-dangnhap">
 
         <h2>
-          Đăng nhập admin
+          Đăng nhập
         </h2>
 
         <input

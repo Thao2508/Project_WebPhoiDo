@@ -28,8 +28,7 @@ export default function SideBarAdmin() {
   const handleDangXuat = () => {
 
     localStorage.removeItem("admin");
-
-    navigate("/dangnhapadmin");
+    navigate("/quantri");
 
   };
 
@@ -106,7 +105,7 @@ export default function SideBarAdmin() {
         {/* LUẬT PHỐI LOẠI ĐỒ */}
 
         <Link
-          to="/quantri/luatloaido"
+          to="/quantri/luatphoiloai"
           className="menu-link-admin"
         >
 
@@ -123,7 +122,7 @@ export default function SideBarAdmin() {
 
             <Shirt size={18} />
 
-            <span>Quy tắc phối loại đồ</span>
+            <span>Quy tắc phối loại</span>
 
           </div>
 

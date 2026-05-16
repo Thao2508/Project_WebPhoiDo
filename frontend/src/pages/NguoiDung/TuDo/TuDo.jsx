@@ -1,18 +1,32 @@
 import "./TuDo.scss";
+
 import Sidebar from "../../../components/SideBar/SideBar";
+
 import {
   Search,
   Plus,
   Shirt,
   Trash2,
-  X
+  X,
+  Pencil,
+  Check
 } from "lucide-react";
+
 import { Link } from "react-router-dom";
+
 import { useState } from "react";
+
 export default function TuDo() {
 
-    const [openDialog, setOpenDialog] = useState(false);
-    const trangPhuc = [
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const [selectedOutfit, setSelectedOutfit] = useState([]);
+
+  const [isSelecting, setIsSelecting] = useState(false);
+
+  const trangPhuc = [
 
     {
       id: 1,
@@ -69,30 +83,94 @@ export default function TuDo() {
     }
   ];
 
+  const handleSelectItem = (item) => {
+
+    const isExist = selectedOutfit.find(
+      (i) => i.id === item.id
+    );
+
+    if (isExist) {
+
+      setSelectedOutfit(
+        selectedOutfit.filter(
+          (i) => i.id !== item.id
+        )
+      );
+
+      return;
+    }
+
+    setSelectedOutfit([
+      ...selectedOutfit,
+      item
+    ]);
+  };
+
+  const handleOpenUpdate = (item, e) => {
+
+    e.stopPropagation();
+
+    setSelectedItem(item);
+
+    setOpenDialog(true);
+  };
+
   return (
 
     <div className="tudo">
 
-      {/* SIDEBAR */}
       <Sidebar />
 
-      {/* MAIN */}
       <div className="tudo-main">
 
         {/* TOPBAR */}
+
         <div className="td-topbar">
+
+          <div>
+
             <h1>Tủ đồ của tôi</h1>
 
-        <Link to="/themtrangphuc">
-        <button className="upload-btn">
-            <Plus size={18} />
-            Thêm trang phục
-        </button>
-        </Link>
+          </div>
+
+          <div className="topbar-right">
+            <button
+              className="match-mode-btn"
+
+              onClick={() => {
+
+                setIsSelecting(true);
+              }}
+            >
+
+              <Shirt size={18} />
+
+              <span>
+                Phối đồ từ tủ đồ
+              </span>
+
+            </button>
+
+            <Link to="/themtrangphuc">
+
+              <button className="upload-btn">
+
+                <Plus size={18} />
+
+                <span>
+                  Thêm trang phục
+                </span>
+
+              </button>
+
+            </Link>
+
+          </div>
 
         </div>
 
         {/* SEARCH */}
+
         <div className="td-search-box">
 
           <Search size={18} />
@@ -105,6 +183,7 @@ export default function TuDo() {
         </div>
 
         {/* FILTER */}
+
         <div className="td-filter">
 
           <button className="active">
@@ -119,214 +198,313 @@ export default function TuDo() {
 
         </div>
 
-        {/* GRID */}
-        <div className="td-grid">
+        {/* SELECTED BAR */}
 
-          {trangPhuc.map((item) => (
+        {
+        isSelecting && (
 
-            <div
-                className="td-card"
-                key={item.id}
-                onClick={() => setOpenDialog(true)}
-                >
+          <div className="selected-bar">
+
+            <div>
+
+              <h3>
+                Đang phối đồ từ tủ đồ
+              </h3>
+
+              <p>
+
+                Vui lòng chọn ít nhất
+                1 áo và 1 quần/váy để phối
+
+              </p>
+
+            </div>
+
+            <div className="select-actions">
 
               <button
-                className="td-delete"
-                onClick={(e) => {
-                    e.stopPropagation();
+                className="cancel-select-btn"
 
-                    alert("Đã xóa!");
+                onClick={() => {
+
+                  setIsSelecting(false);
+
+                  setSelectedOutfit([]);
                 }}
-                >
+              >
 
-                <Trash2 size={16} />
+                Hủy
 
               </button>
 
-              <img
-                src={item.anh}
-                alt=""
-              />
+              {
+                selectedOutfit.length > 0 && (
 
-              <div className="td-info">
+                  <button className="match-btn">
 
-                <h3>{item.ten}</h3>
+                    <Shirt size={18} />
 
-                <div className="td-tags">
+                    <span>
+                      Phối đồ ngay
+                    </span>
 
-                  <span className="loai">
-                    {item.loai}
-                  </span>
+                  </button>
+                )
+              }
 
-                  <span className="mau">
-                    {item.mau}
-                  </span>
+            </div>
+
+          </div>
+        )
+      }
+
+
+        {/* GRID */}
+
+        <div className="td-grid">
+
+          {
+            trangPhuc.map((item) => {
+
+              const isSelected = selectedOutfit.some(
+                (i) => i.id === item.id
+              );
+
+              return (
+
+                <div
+                  className={
+                    isSelected
+
+                    ? "td-card selected"
+
+                    : "td-card"
+                  }
+
+                  key={item.id}
+
+                  onClick={() => {
+                  if(isSelecting){
+                    handleSelectItem(item);
+                  }
+                }}
+                >
+
+                  {/* SELECTED */}
+
+                  {
+                    isSelecting && isSelected && (
+                      <div className="selected-check">
+
+                        <Check size={16} />
+
+                      </div>
+                    )
+                  }
+
+                  {/* IMAGE */}
+
+                  <img
+                    src={item.anh}
+                    alt=""
+                  />
+
+                  {/* ACTION */}
+
+                  <div className="td-action-group">
+
+                    <button
+                      className="td-update"
+
+                      onClick={(e) =>
+                        handleOpenUpdate(item, e)
+                      }
+                    >
+
+                      <Pencil size={15} />
+
+                    </button>
+
+                    <button
+                      className="td-delete"
+
+                      onClick={(e) => {
+
+                        e.stopPropagation();
+
+                        alert("Đã xóa!");
+                      }}
+                    >
+
+                      <Trash2 size={15} />
+
+                    </button>
+
+                  </div>
+
+                  {/* INFO */}
+
+                  <div className="td-info">
+
+                    <h3>
+                      {item.ten}
+                    </h3>
+
+                    <div className="td-tags">
+
+                      <span className="loai">
+                        {item.loai}
+                      </span>
+
+                      <span className="mau">
+                        {item.mau}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                </div>
+              );
+            })
+          }
+
+        </div>
+
+      </div>
+
+      {/* UPDATE DIALOG */}
+
+      {
+        openDialog && selectedItem && (
+
+          <div
+            className="td-dialog-overlay"
+            onClick={() => setOpenDialog(false)}
+          >
+
+            <div
+              className="td-dialog"
+              onClick={(e) => e.stopPropagation()}
+            >
+
+              {/* IMAGE */}
+
+              <div className="td-dialog-image">
+
+                <img
+                  src={selectedItem.anh}
+                  alt=""
+                />
+
+              </div>
+
+              {/* CONTENT */}
+
+              <div className="td-dialog-content">
+
+                <button
+                  className="td-close"
+                  onClick={() => setOpenDialog(false)}
+                >
+
+                  <X size={18} />
+
+                </button>
+
+                <h2>
+                  Cập nhật trang phục
+                </h2>
+
+                {/* NAME */}
+
+                <div className="td-form-group">
+
+                  <label>
+                    Tên trang phục
+                  </label>
+
+                  <input
+                    type="text"
+                    defaultValue={selectedItem.ten}
+                  />
+
+                </div>
+
+                {/* TYPE */}
+
+                <div className="td-form-group">
+
+                  <label>
+                    Loại trang phục
+                  </label>
+
+                  <select defaultValue={selectedItem.loai}>
+
+                    <option value="Áo">
+                      Áo
+                    </option>
+
+                    <option value="Quần">
+                      Quần
+                    </option>
+
+                    <option value="Váy">
+                      Váy
+                    </option>
+
+                  </select>
+
+                </div>
+
+                {/* COLOR */}
+
+                <div className="td-form-group">
+
+                  <label>
+                    Màu sắc
+                  </label>
+
+                  <select defaultValue={selectedItem.mau}>
+
+                    <option value="Trắng">
+                      Trắng
+                    </option>
+
+                    <option value="Đen">
+                      Đen
+                    </option>
+
+                    <option value="Xanh">
+                      Xanh
+                    </option>
+
+                    <option value="Be">
+                      Be
+                    </option>
+
+                  </select>
+
+                </div>
+
+                {/* BUTTON */}
+
+                <div className="td-dialog-actions">
+
+                  <button className="update-btn">
+                    Cập nhật
+                  </button>
 
                 </div>
 
               </div>
 
             </div>
-          ))}
 
-        </div>
-
-      </div>
-
-    {
-        openDialog && (
-
-            <div
-            className="td-dialog-overlay"
-            onClick={() => setOpenDialog(false)}
-            >
-
-            <div
-                className="td-dialog"
-                onClick={(e) => e.stopPropagation()}
-            >
-
-                {/* IMAGE */}
-
-                <div className="td-dialog-image">
-
-                <img
-                    src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1000&auto=format&fit=crop"
-                    alt=""
-                />
-
-                </div>
-
-                {/* CONTENT */}
-
-                <div className="td-dialog-content">
-                <button
-                    className="td-close"
-                    onClick={() => setOpenDialog(false)}
-                    >
-                    <X size={18} />
-                </button>
-                <h2>Cập nhật trang phục</h2>
-
-                {/* Tên */}
-
-                <div className="td-form-group">
-
-                    <label>Tên trang phục</label>
-
-                    <input
-                    type="text"
-                    value="Áo thun trắng"
-                    />
-
-                </div>
-
-                {/* Loại */}
-
-                <div className="td-form-group">
-
-                    <label>Loại trang phục</label>
-
-                    <select value="Áo">
-
-                    <option value="Áo">
-                        Áo
-                    </option>
-
-                    <option value="Quần">
-                        Quần
-                    </option>
-
-                    <option value="Váy">
-                        Váy
-                    </option>
-
-                    </select>
-
-                </div>
-
-                {/* Màu */}
-
-                <div className="td-form-group">
-
-                    <label>Màu sắc</label>
-
-                    <select value="Trắng">
-
-                    <option value="Trắng">
-                        Trắng
-                    </option>
-
-                    <option value="Đen">
-                        Đen
-                    </option>
-
-                    <option value="Xanh">
-                        Xanh
-                    </option>
-
-                    <option value="Be">
-                        Be
-                    </option>
-
-                    </select>
-
-                </div>
-                {/* Họa tiết */}
-
-                <div className="td-form-group">
-
-                    <label>Họa tiết</label>
-
-                    <select value="">
-
-                        <option value="">
-                            Không có họa tiết
-                        </option>
-
-                        <option value="Trơn">
-                            Trơn
-                        </option>
-
-                        <option value="Sọc">
-                            Sọc
-                        </option>
-
-                        <option value="Caro">
-                            Caro
-                        </option>
-
-                        <option value="Graphic">
-                            Graphic
-                        </option>
-
-                        <option value="Floral">
-                            Floral
-                        </option>
-
-                    </select>
-
-                </div>
-                {/* BUTTON */}
-
-                <div className="td-dialog-actions">
-
-                    <button className="update-btn">
-                    Cập nhật
-                    </button>
-
-                </div>
-
-                </div>
-
-            </div>
-
-            </div>
-
+          </div>
         )
-        }
+      }
 
     </div>
-    
   );
 }

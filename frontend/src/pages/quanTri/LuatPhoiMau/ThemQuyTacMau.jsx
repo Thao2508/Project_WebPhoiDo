@@ -11,66 +11,126 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-import { Link } from "react-router-dom";
+import {
+  Link,
+  useNavigate
+} from "react-router-dom";
+
+import {
+  useEffect,
+  useState
+} from "react";
+
+import axios from "axios";
 
 export default function ThemQuyTacMau() {
 
-  // DATA MAU
+  const navigate = useNavigate();
 
-  const mauOptions = [
+  // DATA
 
-    {
-      value: "đen",
+  const [mauOptions,setMauOptions] = useState([]);
 
-      label: "Đen",
+  const [phongCachs,setPhongCachs] = useState([]);
 
-      hex: "#000000",
-    },
+  const [dipSuDungs,setDipSuDungs] = useState([]);
 
-    {
-      value: "trắng",
+  // FORM
 
-      label: "Trắng",
+  const [formData,setFormData] = useState({
 
-      hex: "#ffffff",
-    },
+    maMau_1:"",
+    maMau_2:"",
+    maPhongCach:"",
+    maDipSD:"",
+    hopLe:true
+  });
 
-    {
-      value: "xanh_navy",
+  // LOAD DATA
 
-      label: "Xanh navy",
+  useEffect(()=>{
 
-      hex: "#1e3a8a",
-    },
+    layDanhSachMau();
 
-    {
-      value: "be",
+    layDanhSachPhongCach();
 
-      label: "Be",
+    layDanhSachDipSD();
 
-      hex: "#d6c2a1",
-    },
+  },[]);
 
-    {
-      value: "xám",
+  // API MAU
 
-      label: "Xám",
+  const layDanhSachMau = async()=>{
 
-      hex: "#9ca3af",
-    },
+    try{
 
-  ];
+      const response = await axios.get(
+        "http://127.0.0.1:8000/mau/"
+      );
 
-  // CUSTOM OPTION
+      const data = response.data.map(item=>({
 
-  const formatColorOption = (option) => (
+        value:item.maMau,
+
+        label:item.tenMau,
+
+        hex:item.maMauHex
+      }));
+
+      setMauOptions(data);
+
+    }catch(error){
+
+      console.log(error);
+    }
+  };
+
+  // API PHONG CACH
+
+  const layDanhSachPhongCach = async()=>{
+
+    try{
+
+      const response = await axios.get(
+        "http://127.0.0.1:8000/phong-cach/"
+      );
+
+      setPhongCachs(response.data);
+
+    }catch(error){
+
+      console.log(error);
+    }
+  };
+
+  // API DIP SU DUNG
+
+  const layDanhSachDipSD = async()=>{
+
+    try{
+
+      const response = await axios.get(
+        "http://127.0.0.1:8000/dip-su-dung/"
+      );
+
+      setDipSuDungs(response.data);
+
+    }catch(error){
+
+      console.log(error);
+    }
+  };
+
+  // FORMAT MAU
+
+  const formatColorOption = (option)=>(
 
     <div className="color-option">
 
       <div
         className="color-preview"
         style={{
-          background: option.hex
+          background:option.hex
         }}
       ></div>
 
@@ -79,8 +139,73 @@ export default function ThemQuyTacMau() {
       </span>
 
     </div>
-
   );
+
+  // HANDLE CHANGE
+
+  const handleChange = (field,value)=>{
+
+    setFormData(prev=>({
+
+      ...prev,
+
+      [field]:value
+    }));
+  };
+
+  // SUBMIT
+
+  const handleSubmit = async()=>{
+
+    if(
+      !formData.maMau_1 ||
+      !formData.maMau_2 ||
+      !formData.maPhongCach ||
+      !formData.maDipSD
+    ){
+
+      alert(
+        "Vui lòng nhập đầy đủ thông tin"
+      );
+
+      return;
+    }
+
+    try{
+
+      const response = await axios.post(
+
+        "http://127.0.0.1:8000/luat-phoi-mau/",
+
+        formData
+      );
+
+      if(!response.data.success){
+
+        alert(
+          response.data.message
+        );
+
+        return;
+      }
+
+      alert(
+        "Thêm quy tắc thành công"
+      );
+
+      navigate(
+        "/quantri/luatphoimau"
+      );
+
+    }catch(error){
+
+      console.log(error);
+
+      alert(
+        "Thêm thất bại"
+      );
+    }
+  };
 
   return (
 
@@ -142,12 +267,34 @@ export default function ThemQuyTacMau() {
                 </label>
 
                 <Select
+
                   options={mauOptions}
+
                   placeholder="Tìm màu..."
+
                   formatOptionLabel={
                     formatColorOption
                   }
+
+                  value={
+                    mauOptions.find(
+                      item=>
+                      item.value
+                      ===
+                      formData.maMau_1
+                    )
+                  }
+
+                  onChange={(selected)=>
+
+                    handleChange(
+                      "maMau_1",
+                      selected.value
+                    )
+                  }
+
                   className="react-select-container"
+
                   classNamePrefix="react-select"
                 />
 
@@ -162,12 +309,34 @@ export default function ThemQuyTacMau() {
                 </label>
 
                 <Select
+
                   options={mauOptions}
+
                   placeholder="Tìm màu..."
+
                   formatOptionLabel={
                     formatColorOption
                   }
+
+                  value={
+                    mauOptions.find(
+                      item=>
+                      item.value
+                      ===
+                      formData.maMau_2
+                    )
+                  }
+
+                  onChange={(selected)=>
+
+                    handleChange(
+                      "maMau_2",
+                      selected.value
+                    )
+                  }
+
                   className="react-select-container"
+
                   classNamePrefix="react-select"
                 />
 
@@ -185,19 +354,47 @@ export default function ThemQuyTacMau() {
 
                   <Sparkles size={18} />
 
-                  <select>
+                  <select
 
-                    <option>
-                      Minimal
+                    value={
+                      formData.maPhongCach
+                    }
+
+                    onChange={(e)=>
+
+                      handleChange(
+
+                        "maPhongCach",
+
+                        Number(
+                          e.target.value
+                        )
+                      )
+                    }
+                  >
+
+                    <option value="">
+                      Chọn phong cách
                     </option>
 
-                    <option>
-                      Casual
-                    </option>
+                    {
+                      phongCachs.map(item=>(
 
-                    <option>
-                      Streetwear
-                    </option>
+                        <option
+                          key={
+                            item.maPhongCach
+                          }
+
+                          value={
+                            item.maPhongCach
+                          }
+                        >
+
+                          {item.tenPhongCach}
+
+                        </option>
+                      ))
+                    }
 
                   </select>
 
@@ -217,19 +414,47 @@ export default function ThemQuyTacMau() {
 
                   <CalendarDays size={18} />
 
-                  <select>
+                  <select
 
-                    <option>
-                      Đi làm
+                    value={
+                      formData.maDipSD
+                    }
+
+                    onChange={(e)=>
+
+                      handleChange(
+
+                        "maDipSD",
+
+                        Number(
+                          e.target.value
+                        )
+                      )
+                    }
+                  >
+
+                    <option value="">
+                      Chọn dịp sử dụng
                     </option>
 
-                    <option>
-                      Đi chơi
-                    </option>
+                    {
+                      dipSuDungs.map(item=>(
 
-                    <option>
-                      Dạo phố
-                    </option>
+                        <option
+                          key={
+                            item.maDipSD
+                          }
+
+                          value={
+                            item.maDipSD
+                          }
+                        >
+
+                          {item.tenDipSD}
+
+                        </option>
+                      ))
+                    }
 
                   </select>
 
@@ -249,13 +474,30 @@ export default function ThemQuyTacMau() {
 
                   <CheckCircle2 size={18} />
 
-                  <select>
+                  <select
 
-                    <option>
+                    value={String(
+                      formData.hopLe
+                    )}
+
+                    onChange={(e)=>
+
+                      handleChange(
+
+                        "hopLe",
+
+                        e.target.value
+                        ===
+                        "true"
+                      )
+                    }
+                  >
+
+                    <option value="true">
                       Hợp lệ
                     </option>
 
-                    <option>
+                    <option value="false">
                       Không hợp
                     </option>
 
@@ -267,7 +509,10 @@ export default function ThemQuyTacMau() {
 
               {/* BUTTON */}
 
-              <button className="tqtm-submit">
+              <button
+                className="tqtm-submit"
+                onClick={handleSubmit}
+              >
 
                 Thêm quy tắc
 

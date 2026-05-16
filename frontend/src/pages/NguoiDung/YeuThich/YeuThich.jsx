@@ -96,10 +96,6 @@ export default function YeuThich() {
 
             <h1>Yêu thích</h1>
 
-            <p>
-              Những outfit bạn đã lưu
-            </p>
-
           </div>
 
         </div>
