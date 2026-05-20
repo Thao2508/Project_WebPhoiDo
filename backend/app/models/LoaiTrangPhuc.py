@@ -2,6 +2,7 @@ from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 from app.db.database import Base
 
@@ -26,3 +27,8 @@ class LoaiTrangPhuc(Base):
         ForeignKey("danh_muc.maDanhMuc"),
         nullable=False
     )
+
+    danhMuc = relationship(
+        "DanhMuc"
+    )
+

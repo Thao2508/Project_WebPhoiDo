@@ -4,6 +4,8 @@ from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy import ForeignKey
 
+from sqlalchemy.orm import relationship
+
 from app.db.database import Base
 
 
@@ -50,3 +52,16 @@ class TrangPhuc(Base):
         ForeignKey("nguoi_dung.maNguoiDung"),
         nullable=False
     )
+
+    loai = relationship(
+        "LoaiTrangPhuc"
+    )
+
+    mau = relationship(
+        "Mau"
+    )
+
+    hoaTiet = relationship(
+        "HoaTiet"
+    )
+

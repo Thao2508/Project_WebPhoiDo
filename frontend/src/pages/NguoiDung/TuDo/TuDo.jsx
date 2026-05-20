@@ -14,7 +14,7 @@ import {
 
 import { Link } from "react-router-dom";
 
-import { useState } from "react";
+import { useState, useEffect} from "react";
 
 export default function TuDo() {
 
@@ -26,74 +26,112 @@ export default function TuDo() {
 
   const [isSelecting, setIsSelecting] = useState(false);
 
-  const trangPhuc = [
+  const [trangPhuc, setTrangPhuc] = useState([]);
 
-    {
-      id: 1,
-      ten: "Áo thun trắng",
-      loai: "Áo",
-      mau: "Trắng",
-      anh:
-        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1000&auto=format&fit=crop"
-    },
+  const [filteredData, setFilteredData] = useState([]);
 
-    {
-      id: 2,
-      ten: "Quần jean xanh",
-      loai: "Quần",
-      mau: "Xanh",
-      anh:
-        "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=1000&auto=format&fit=crop"
-    },
+  const [searchText, setSearchText] = useState("");
 
-    {
-      id: 3,
-      ten: "Sơ mi đen",
-      loai: "Áo",
-      mau: "Đen",
-      anh:
-        "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=1000&auto=format&fit=crop"
-    },
+  const [selectedCategory, setSelectedCategory] = useState("Tất cả");
 
-    {
-      id: 4,
-      ten: "Hoodie be",
-      loai: "Áo",
-      mau: "Be",
-      anh:
-        "https://images.unsplash.com/photo-1503341504253-dff4815485f1?q=80&w=1000&auto=format&fit=crop"
-    },
+  const [danhMuc, setDanhMuc] = useState([]);
 
-    {
-      id: 5,
-      ten: "Chân váy trắng",
-      loai: "Váy",
-      mau: "Trắng",
-      anh:
-        "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=1000&auto=format&fit=crop"
-    },
+  const [loaiTrangPhuc, setLoaiTrangPhuc] = useState([]);
 
-    {
-      id: 6,
-      ten: "Quần tây đen",
-      loai: "Quần",
-      mau: "Đen",
-      anh:
-        "https://images.unsplash.com/photo-1506629905607-d9c297d4d42c?q=80&w=1000&auto=format&fit=crop"
+  const [mauSac, setMauSac] = useState([]);
+
+  const [formData, setFormData] = useState({
+
+    tenTrangPhuc: "",
+
+    maLoai: "",
+
+    maMau: ""
+  });
+
+  useEffect(() => {
+
+    fetchTrangPhuc();
+
+    fetchDanhMuc();
+
+    fetchLoaiTrangPhuc();
+
+    fetchMauSac();
+
+  }, []);
+
+  const fetchTrangPhuc = async () => {
+
+    try {
+
+      const response = await fetch(
+        "http://localhost:8000/trang-phuc/"
+      );
+
+      const data = await response.json();
+
+      setTrangPhuc(data);
+
+      setFilteredData(data);
+
+    } catch (error) {
+
+      console.log(error);
     }
-  ];
+  };
+
+  const fetchDanhMuc = async () => {
+
+    try {
+
+      const response = await fetch(
+        "http://localhost:8000/danh-muc/"
+      );
+
+      const data = await response.json();
+
+      setDanhMuc(data);
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+  const fetchLoaiTrangPhuc = async () => {
+
+  const response = await fetch(
+    "http://localhost:8000/loai-trang-phuc/"
+  );
+
+  const data = await response.json();
+
+  setLoaiTrangPhuc(data);
+};
+
+  const fetchMauSac = async () => {
+
+    const response = await fetch(
+      "http://localhost:8000/mau/"
+    );
+
+    const data = await response.json();
+
+    setMauSac(data);
+  };
 
   const handleSelectItem = (item) => {
 
     const isExist = selectedOutfit.find(
-      (i) => i.id === item.id
+      (i) => i.maTrangPhuc === item.maTrangPhuc
     );
 
     if (isExist) {
 
       setSelectedOutfit(
         selectedOutfit.filter(
-          (i) => i.id !== item.id
+          (i) => i.maTrangPhuc !== item.maTrangPhuc
         )
       );
 
@@ -114,6 +152,40 @@ export default function TuDo() {
 
     setOpenDialog(true);
   };
+
+  const handleSearch = (
+
+    keyword,
+
+    category
+  ) => {
+
+    let data = [...trangPhuc];
+
+    if (keyword !== "") {
+
+      data = data.filter((item) =>
+
+        item.tenTrangPhuc
+          .toLowerCase()
+
+          .includes(
+            keyword.toLowerCase()
+          )
+      );
+    }
+    if (category !== "Tất cả") {
+
+      data = data.filter(
+
+        (item) =>
+
+          item.tenDanhMuc === category
+      );
+    }
+    setFilteredData(data);
+  };
+
 
   return (
 
@@ -174,10 +246,23 @@ export default function TuDo() {
         <div className="td-search-box">
 
           <Search size={18} />
-
           <input
             type="text"
             placeholder="Tìm kiếm trang phục..."
+
+            value={searchText}
+
+            onChange={(e) => {
+
+              const value = e.target.value;
+
+              setSearchText(value);
+
+              handleSearch(
+                value,
+                selectedCategory
+              );
+            }}
           />
 
         </div>
@@ -185,16 +270,63 @@ export default function TuDo() {
         {/* FILTER */}
 
         <div className="td-filter">
+          <button
+            className={
+              selectedCategory === "Tất cả"
 
-          <button className="active">
+              ? "active"
+
+              : ""
+            }
+
+            onClick={() => {
+
+              setSelectedCategory("Tất cả");
+
+              handleSearch(
+                searchText,
+                "Tất cả"
+              );
+            }}
+          >
             Tất cả
           </button>
 
-          <button>Áo</button>
 
-          <button>Quần</button>
 
-          <button>Váy</button>
+          {
+            danhMuc.map((item) => (
+
+              <button
+
+                key={item.maDanhMuc}
+
+                className={
+                  selectedCategory === item.tenDanhMuc
+
+                  ? "active"
+
+                  : ""
+                }
+
+                onClick={() => {
+
+                  setSelectedCategory(
+                    item.tenDanhMuc
+                  );
+
+                  handleSearch(
+                    searchText,
+                    item.tenDanhMuc
+                  );
+                }}
+              >
+
+                {item.tenDanhMuc}
+
+              </button>
+            ))
+          }
 
         </div>
 
@@ -264,10 +396,10 @@ export default function TuDo() {
         <div className="td-grid">
 
           {
-            trangPhuc.map((item) => {
+            filteredData.map((item) => {
 
               const isSelected = selectedOutfit.some(
-                (i) => i.id === item.id
+                (i) => i.maTrangPhuc === item.maTrangPhuc
               );
 
               return (
@@ -281,14 +413,42 @@ export default function TuDo() {
                     : "td-card"
                   }
 
-                  key={item.id}
+                  key={item.maTrangPhuc}
+                  onClick={async () => {
+                  if (isSelecting) {
 
-                  onClick={() => {
-                  if(isSelecting){
                     handleSelectItem(item);
+
+                    return;
                   }
-                }}
-                >
+
+                  try {
+
+                    const response = await fetch(
+
+                      `http://localhost:8000/trang-phuc/${item.maTrangPhuc}`
+                    );
+
+                    const data = await response.json();
+
+                    setSelectedItem(data);
+
+                    setFormData({
+
+                      tenTrangPhuc: data.tenTrangPhuc,
+
+                      maLoai: data.maLoai,
+
+                      maMau: data.maMau
+                    });
+
+                    setOpenDialog(true);
+
+                  } catch (error) {
+
+                    console.log(error);
+                  }
+                }}>
 
                   {/* SELECTED */}
 
@@ -305,7 +465,7 @@ export default function TuDo() {
                   {/* IMAGE */}
 
                   <img
-                    src={item.anh}
+                    src={item.hinhAnh}
                     alt=""
                   />
 
@@ -328,11 +488,31 @@ export default function TuDo() {
                     <button
                       className="td-delete"
 
-                      onClick={(e) => {
+                      onClick={async (e) => {
 
                         e.stopPropagation();
 
-                        alert("Đã xóa!");
+                        try {
+
+                          const response = await fetch(
+
+                            `http://localhost:8000/trang-phuc/${item.maTrangPhuc}`,
+
+                            {
+                              method: "DELETE"
+                            }
+                          );
+
+                          const data = await response.json();
+
+                          alert(data.message);
+
+                          fetchTrangPhuc();
+
+                        } catch (error) {
+
+                          console.log(error);
+                        }
                       }}
                     >
 
@@ -347,21 +527,8 @@ export default function TuDo() {
                   <div className="td-info">
 
                     <h3>
-                      {item.ten}
+                      {item.tenTrangPhuc}
                     </h3>
-
-                    <div className="td-tags">
-
-                      <span className="loai">
-                        {item.loai}
-                      </span>
-
-                      <span className="mau">
-                        {item.mau}
-                      </span>
-
-                    </div>
-
                   </div>
 
                 </div>
@@ -393,7 +560,7 @@ export default function TuDo() {
               <div className="td-dialog-image">
 
                 <img
-                  src={selectedItem.anh}
+                  src={selectedItem.hinhAnh}
                   alt=""
                 />
 
@@ -426,7 +593,18 @@ export default function TuDo() {
 
                   <input
                     type="text"
-                    defaultValue={selectedItem.ten}
+
+                    value={formData.tenTrangPhuc}
+
+                    onChange={(e) =>
+
+                      setFormData({
+
+                        ...formData,
+
+                        tenTrangPhuc: e.target.value
+                      })
+                    }
                   />
 
                 </div>
@@ -439,19 +617,36 @@ export default function TuDo() {
                     Loại trang phục
                   </label>
 
-                  <select defaultValue={selectedItem.loai}>
+                  <select
 
-                    <option value="Áo">
-                      Áo
-                    </option>
+                    value={formData.maLoai}
 
-                    <option value="Quần">
-                      Quần
-                    </option>
+                    onChange={(e) =>
 
-                    <option value="Váy">
-                      Váy
-                    </option>
+                      setFormData({
+
+                        ...formData,
+
+                        maLoai: e.target.value
+                      })
+                    }
+                  >
+
+                    {
+                      loaiTrangPhuc.map((item) => (
+
+                        <option
+
+                          key={item.maLoai}
+
+                          value={item.maLoai}
+                        >
+
+                          {item.tenLoai}
+
+                        </option>
+                      ))
+                    }
 
                   </select>
 
@@ -465,23 +660,35 @@ export default function TuDo() {
                     Màu sắc
                   </label>
 
-                  <select defaultValue={selectedItem.mau}>
+                  <select
+                    value={formData.maMau}
 
-                    <option value="Trắng">
-                      Trắng
-                    </option>
+                    onChange={(e) =>
 
-                    <option value="Đen">
-                      Đen
-                    </option>
+                      setFormData({
 
-                    <option value="Xanh">
-                      Xanh
-                    </option>
+                        ...formData,
 
-                    <option value="Be">
-                      Be
-                    </option>
+                        maMau: e.target.value
+                      })
+                    }
+                  >
+
+                    {
+                      mauSac.map((item) => (
+
+                        <option
+
+                          key={item.maMau}
+
+                          value={item.maMau}
+                        >
+
+                          {item.tenMau}
+
+                        </option>
+                      ))
+                    }
 
                   </select>
 

@@ -70,13 +70,3 @@ def update(
     )
 
 
-@router.delete("/{id}")
-def delete(
-    id: int,
-    db: Session = Depends(get_db)
-):
-
-    return loai_trang_phuc_service.xoa_loai(
-        db,
-        id
-    )
