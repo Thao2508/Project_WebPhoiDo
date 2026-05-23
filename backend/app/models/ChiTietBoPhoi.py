@@ -1,7 +1,7 @@
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import ForeignKey
-
+from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 
@@ -19,4 +19,14 @@ class ChiTietBoPhoi(Base):
         Integer,
         ForeignKey("trang_phuc.maTrangPhuc"),
         primary_key=True
+    )
+
+    boPhoi = relationship(
+        "BoPhoi",
+        back_populates="chiTietBoPhois"
+    )
+
+    trangPhuc = relationship(
+        "TrangPhuc",
+        back_populates="chiTietBoPhois"
     )

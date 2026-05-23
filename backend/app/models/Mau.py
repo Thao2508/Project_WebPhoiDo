@@ -1,7 +1,7 @@
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
-
+from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 
@@ -23,4 +23,9 @@ class Mau(Base):
     maMauHex = Column(
         String(20),
         nullable=False
+    )
+
+    trangPhucs = relationship(
+        "TrangPhuc",
+        back_populates="mau"
     )

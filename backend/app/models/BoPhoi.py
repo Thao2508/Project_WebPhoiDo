@@ -4,7 +4,7 @@ from sqlalchemy import String
 from sqlalchemy import Date
 from sqlalchemy import Boolean
 from sqlalchemy import ForeignKey
-
+from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 
@@ -53,4 +53,21 @@ class BoPhoi(Base):
     hopLe = Column(
         Boolean,
         default=True
+    )
+    luatPhoiLoaiDo = relationship(
+        "LuatPhoiLoaiDo"
+    )
+
+    luatPhoiMau = relationship(
+        "LuatPhoiMau"
+    )
+
+    chiTietBoPhois = relationship(
+        "ChiTietBoPhoi",
+        back_populates="boPhoi"
+    )
+
+    yeuThichs = relationship(
+        "YeuThich",
+        back_populates="boPhoi"
     )

@@ -16,6 +16,7 @@ from app.routers.danh_muc_route import router as danhMucRouter
 from app.routers.loai_trang_phuc_route import router as loaiTrangPhucRouter
 from app.routers.trang_phuc_route import router as trangPhucRouter
 from app.routers.hoa_tiet_route import router as hoaTietRouter
+from app.routers.phoi_do_route import router as phoiDoRouter
 
 from app.models.Mau import Mau
 from app.models.PhongCach import PhongCach
@@ -26,8 +27,10 @@ from app.models.DanhMuc import DanhMuc
 from app.models.LoaiTrangPhuc import LoaiTrangPhuc
 from app.models.HoaTiet import HoaTiet
 from app.models.TrangPhuc import TrangPhuc
-
-
+from app.models.LuatPhoiLoaiDo import LuatPhoiLoaiDo
+from app.models.YeuThich import YeuThich
+from app.models.BoPhoi import BoPhoi
+from app.models.ChiTietBoPhoi import ChiTietBoPhoi
 
 app = FastAPI()
 
@@ -62,3 +65,4 @@ app.include_router(danhMucRouter)
 app.include_router(loaiTrangPhucRouter)
 app.include_router(trangPhucRouter)
 app.include_router(hoaTietRouter)
+app.include_router(phoiDoRouter)

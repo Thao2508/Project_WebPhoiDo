@@ -171,6 +171,52 @@ async def them_trang_phuc(
     }
 
 
+@router.put("/{ma_trang_phuc}")
+async def update_trang_phuc(
+
+    ma_trang_phuc: int,
+
+    data: dict,
+
+    db: Session = Depends(get_db)
+):
+
+    item = db.query(
+        TrangPhuc
+    ).filter(
+
+        TrangPhuc.maTrangPhuc
+        == ma_trang_phuc
+
+    ).first()
+
+
+
+    if not item:
+
+        return {
+            "message": "Không tìm thấy"
+        }
+
+
+
+    item.tenTrangPhuc = data["tenTrangPhuc"]
+
+    item.maLoai = data["maLoai"]
+
+    item.maMau = data["maMau"]
+
+
+
+    db.commit()
+
+
+
+    return {
+        "message": "Cập nhật thành công"
+    }
+
+
 @router.delete("/{maTrangPhuc}")
 def xoa_trang_phuc(
 

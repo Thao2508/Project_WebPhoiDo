@@ -2,7 +2,7 @@ from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import Boolean
 from sqlalchemy import ForeignKey
-
+from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 
@@ -43,4 +43,14 @@ class LuatPhoiLoaiDo(Base):
     hopLe = Column(
         Boolean,
         default=True
+    )
+
+    phongCach = relationship(
+        "PhongCach",
+        back_populates="luatPhoiLoaiDos"
+    )
+
+    dipSuDung = relationship(
+        "DipSuDung",
+        back_populates="luatPhoiLoaiDos"
     )

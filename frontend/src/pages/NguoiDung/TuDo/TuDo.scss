@@ -363,3 +363,118 @@
   cursor:pointer;
   font-weight:600;
 }
+
+.match-options {
+
+  display: flex;
+
+  gap: 12px;
+
+  margin-bottom: 15px;
+}
+
+.match-options select {
+
+  height: 42px;
+
+  padding: 0 14px;
+
+  border-radius: 10px;
+
+  border: 1px solid #ddd;
+}
+
+
+/* ========================= */
+/* GOI Y */
+/* ========================= */
+
+.goiy-section {
+
+  margin-top: 40px;
+}
+
+.goiy-grid {
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 20px;
+
+  margin-top: 20px;
+}
+
+.goiy-card {
+
+  background: white;
+
+  border-radius: 20px;
+
+  padding: 20px;
+
+  display: flex;
+
+  gap: 20px;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.goiy-item {
+
+  width: 180px;
+}
+
+.goiy-item img {
+
+  width: 100%;
+
+  height: 220px;
+
+  object-fit: cover;
+
+  border-radius: 14px;
+}
+
+.goiy-item p {
+
+  margin-top: 10px;
+
+  font-weight: 600;
+
+  text-align: center;
+}
+
+.goiy-header {
+  margin-bottom: 20px;
+}
+
+.fallback-message {
+
+  color: #ff9800;
+
+  font-size: 14px;
+
+  margin-top: 8px;
+
+  font-weight: 500;
+}
+
+.fallback-badge {
+
+  background: #fff3cd;
+
+  color: #856404;
+
+  padding: 6px 10px;
+
+  border-radius: 10px;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  margin-bottom: 10px;
+
+  width: fit-content;
+}

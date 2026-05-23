@@ -3,7 +3,7 @@ from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Boolean
 from sqlalchemy import Date
-
+from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 
@@ -53,4 +53,14 @@ class NguoiDung(Base):
         Boolean,
         nullable=False,
         default=True
+    )
+
+    trangPhucs = relationship(
+        "TrangPhuc",
+        back_populates="nguoiDung"
+    )
+
+    yeuThichs = relationship(
+        "YeuThich",
+        back_populates="nguoiDung"
     )

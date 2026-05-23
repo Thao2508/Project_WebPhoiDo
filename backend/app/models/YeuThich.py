@@ -2,7 +2,7 @@ from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
-
+from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 
@@ -25,4 +25,14 @@ class YeuThich(Base):
     ngayTao = Column(
         DateTime,
         nullable=False
+    )
+
+    nguoiDung = relationship(
+        "NguoiDung",
+        back_populates="yeuThichs"
+    )
+
+    boPhoi = relationship(
+        "BoPhoi",
+        back_populates="yeuThichs"
     )

@@ -53,15 +53,27 @@ class TrangPhuc(Base):
         nullable=False
     )
 
-    loai = relationship(
-        "LoaiTrangPhuc"
-    )
-
     mau = relationship(
-        "Mau"
+        "Mau",
+        back_populates="trangPhucs"
     )
 
     hoaTiet = relationship(
-        "HoaTiet"
+        "HoaTiet",
+        back_populates="trangPhucs"
     )
 
+    loai = relationship(
+        "LoaiTrangPhuc",
+        back_populates="trangPhucs"
+    )
+
+    nguoiDung = relationship(
+        "NguoiDung",
+        back_populates="trangPhucs"
+    )
+
+    chiTietBoPhois = relationship(
+        "ChiTietBoPhoi",
+        back_populates="trangPhuc"
+    )

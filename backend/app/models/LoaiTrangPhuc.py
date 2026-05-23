@@ -29,6 +29,12 @@ class LoaiTrangPhuc(Base):
     )
 
     danhMuc = relationship(
-        "DanhMuc"
+        "DanhMuc",
+        back_populates="loaiTrangPhucs"
+    )
+
+    trangPhucs = relationship(
+        "TrangPhuc",
+        back_populates="loai"
     )
 

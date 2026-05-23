@@ -49,6 +49,16 @@ export default function TuDo() {
     maMau: ""
   });
 
+  const [phongCach, setPhongCach] = useState([]);
+
+  const [dipSuDung, setDipSuDung] = useState([]);
+
+  const [selectedPhongCach, setSelectedPhongCach] = useState("");
+
+  const [selectedDip, setSelectedDip] = useState("");
+
+  const [goiYOutfits, setGoiYOutfits] = useState([]);
+
   useEffect(() => {
 
     fetchTrangPhuc();
@@ -58,6 +68,10 @@ export default function TuDo() {
     fetchLoaiTrangPhuc();
 
     fetchMauSac();
+
+    fetchPhongCach();
+
+    fetchDipSuDung();
 
   }, []);
 
@@ -120,6 +134,44 @@ export default function TuDo() {
 
     setMauSac(data);
   };
+
+  const fetchPhongCach = async () => {
+
+    try {
+
+      const response = await fetch(
+        "http://localhost:8000/phong-cach/"
+      );
+
+      const data = await response.json();
+
+      setPhongCach(data);
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+
+  const fetchDipSuDung = async () => {
+
+    try {
+
+      const response = await fetch(
+        "http://localhost:8000/dip-su-dung/"
+      );
+
+      const data = await response.json();
+
+      setDipSuDung(data);
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
 
   const handleSelectItem = (item) => {
 
@@ -186,6 +238,161 @@ export default function TuDo() {
     setFilteredData(data);
   };
 
+
+  const handleUpdateTrangPhuc = async () => {
+
+    try {
+
+      const response = await fetch(
+
+        `http://localhost:8000/trang-phuc/${selectedItem.maTrangPhuc}`,
+
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+
+            tenTrangPhuc:
+              formData.tenTrangPhuc,
+
+            maLoai:
+              parseInt(formData.maLoai),
+
+            maMau:
+              parseInt(formData.maMau)
+          })
+        }
+      );
+
+
+
+      const data = await response.json();
+
+      alert(data.message);
+
+
+
+      // reload list
+      fetchTrangPhuc();
+
+
+
+      // close dialog
+      setOpenDialog(false);
+
+
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+  const handlePhoiDo = async () => {
+
+    // =========================
+    // VALIDATE
+    // =========================
+
+    if (selectedOutfit.length === 0) {
+
+      alert("Vui lòng chọn trang phục");
+
+      return;
+    }
+
+    if (!selectedPhongCach) {
+
+      alert("Vui lòng chọn phong cách");
+
+      return;
+    }
+
+    if (!selectedDip) {
+
+      alert("Vui lòng chọn dịp sử dụng");
+
+      return;
+    }
+
+    try {
+
+      // clear old result
+      setGoiYOutfits([]);
+
+      const response = await fetch(
+
+        "http://localhost:8000/phoi-do/goi-y",
+
+        {
+
+          method: "POST",
+
+          headers: {
+
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+
+            selectedItems:
+
+              selectedOutfit.map(
+                (item) => item.maTrangPhuc
+              ),
+
+            maPhongCach:
+              parseInt(selectedPhongCach),
+
+            maDipSD:
+              parseInt(selectedDip),
+
+            maNguoiDung: 1
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      console.log(data);
+
+      // =========================
+      // FAIL
+      // =========================
+
+      if (!data.success) {
+
+        alert(data.message);
+
+        return;
+      }
+
+      // =========================
+      // FALLBACK
+      // =========================
+
+      if (data.fallback) {
+
+        alert(data.message);
+      }
+
+      // =========================
+      // SUCCESS
+      // =========================
+
+      setGoiYOutfits(
+        data.outfits
+      );
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
 
   return (
 
@@ -352,6 +559,80 @@ export default function TuDo() {
 
             </div>
 
+            <div className="match-options">
+
+              {/* PHONG CACH */}
+
+              <select
+
+                value={selectedPhongCach}
+
+                onChange={(e) =>
+                  setSelectedPhongCach(
+                    e.target.value
+                  )
+                }
+              >
+
+                <option value="">
+                  Chọn phong cách
+                </option>
+
+                {
+                  phongCach.map((item) => (
+
+                    <option
+
+                      key={item.maPhongCach}
+
+                      value={item.maPhongCach}
+                    >
+
+                      {item.tenPhongCach}
+
+                    </option>
+                  ))
+                }
+
+              </select>
+
+              {/* DIP */}
+
+              <select
+
+                value={selectedDip}
+
+                onChange={(e) =>
+                  setSelectedDip(
+                    e.target.value
+                  )
+                }
+              >
+
+                <option value="">
+                  Chọn dịp sử dụng
+                </option>
+
+                {
+                  dipSuDung.map((item) => (
+
+                    <option
+
+                      key={item.maDipSD}
+
+                      value={item.maDipSD}
+                    >
+
+                      {item.tenDipSD}
+
+                    </option>
+                  ))
+                }
+
+              </select>
+
+            </div>
+
             <div className="select-actions">
 
               <button
@@ -372,7 +653,9 @@ export default function TuDo() {
               {
                 selectedOutfit.length > 0 && (
 
-                  <button className="match-btn">
+                  <button
+                  className="match-btn" 
+                  onClick={handlePhoiDo}>
 
                     <Shirt size={18} />
 
@@ -537,6 +820,81 @@ export default function TuDo() {
           }
 
         </div>
+{/*  */}
+        {
+        goiYOutfits.length > 0 && (
+
+          <div className="goiy-section">
+
+            <div className="goiy-header">
+
+              <h2>
+                Outfit gợi ý
+              </h2>
+
+              {
+                goiYOutfits.some(
+                  item => item.fallback
+                ) && (
+
+                  <p className="fallback-message">
+                    {
+                      goiYOutfits[0]?.message
+                    }
+                  </p>
+                )
+              }
+
+            </div>
+
+            <div className="goiy-grid">
+
+              {
+                goiYOutfits.map(
+
+                  (outfit, index) => (
+
+                    <div
+                      className="goiy-card"
+                    
+                      key={index}
+                    >
+
+                      
+                      {
+                        outfit.items.map((item) => (
+
+                          <div
+                            className="goiy-item"
+
+                            key={
+                              item.maTrangPhuc
+                            }
+                          >
+
+                            <img
+                              src={item.hinhAnh}
+                              alt=""
+                            />
+
+                            <p>
+                              {item.tenTrangPhuc}
+                            </p>
+
+                          </div>
+                        ))
+                      }
+
+                    </div>
+                  )
+                )
+              }
+
+            </div>
+
+          </div>
+        )
+      }
 
       </div>
 
@@ -622,7 +980,6 @@ export default function TuDo() {
                     value={formData.maLoai}
 
                     onChange={(e) =>
-
                       setFormData({
 
                         ...formData,
@@ -697,8 +1054,9 @@ export default function TuDo() {
                 {/* BUTTON */}
 
                 <div className="td-dialog-actions">
-
-                  <button className="update-btn">
+                  <button
+                    className="update-btn"
+                    onClick={handleUpdateTrangPhuc}>
                     Cập nhật
                   </button>
 
