@@ -64,3 +64,8 @@ class NguoiDung(Base):
         "YeuThich",
         back_populates="nguoiDung"
     )
+
+    boPhois = relationship(
+    "BoPhoi",
+    back_populates="nguoiDung"
+)

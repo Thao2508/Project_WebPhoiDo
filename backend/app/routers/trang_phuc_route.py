@@ -1,248 +1,504 @@
-from fastapi import APIRouter
-from fastapi import UploadFile
-from fastapi import File
-from fastapi import Depends
-from fastapi import Form
+from fastapi import (
+    APIRouter,
+    Depends,
+    UploadFile,
+    File,
+    HTTPException
+)
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import (
+    Session,
+    joinedload
+)
 
-from app.db.database import SessionLocal
+from app.db.database import get_db
 
-from app.services.UpLoadAnh import upload_image
+from app.models.TrangPhuc import TrangPhuc
+from app.models.LoaiTrangPhuc import LoaiTrangPhuc
+
+from app.schemas.trang_phuc_schema import TrangPhucCreate
 
 from app.services.XuLyAI import detect_clothing
 
-from app.models.TrangPhuc import TrangPhuc
-
+import traceback
 
 router = APIRouter(
     prefix="/trang-phuc",
-    tags=["Trang phục"]
+    tags=["TrangPhuc"]
 )
 
-
-def get_db():
-
-    db = SessionLocal()
-
-    try:
-        yield db
-
-    finally:
-        db.close()
-
-
-
-@router.get("")
-def get_all_trang_phuc(
-
-    db: Session = Depends(get_db)
-):
-
-    data = db.query(
-        TrangPhuc
-    ).all()
-
-
-    result = []
-
-
-    for item in data:
-
-
-        result.append({
-
-            "maTrangPhuc": item.maTrangPhuc,
-
-            "tenTrangPhuc": item.tenTrangPhuc,
-
-            "hinhAnh": item.hinhAnh,
-
-            "tenLoai": item.loai.tenLoai,
-
-            "tenMau": item.mau.tenMau,
-
-            "tenHoaTiet": item.hoaTiet.tenHoaTiet,
-
-            "tenDanhMuc":
-
-                item.loai.danhMuc.tenDanhMuc
-        })
-
-
-    return result
-
-@router.get("/{maTrangPhuc}")
-def get_trang_phuc_by_id(
-
-    maTrangPhuc: int,
-
-    db: Session = Depends(get_db)
-):
-
-    item = db.query(
-        TrangPhuc
-    ).filter(
-        TrangPhuc.maTrangPhuc == maTrangPhuc
-    ).first()
-
-    if not item:
-
-        return {
-            "message": "Không tìm thấy"
-        }
-
-    return {
-
-        "maTrangPhuc": item.maTrangPhuc,
-
-        "tenTrangPhuc": item.tenTrangPhuc,
-
-        "hinhAnh": item.hinhAnh,
-
-        "maLoai": item.maLoai,
-
-        "maMau": item.maMau,
-
-        "maHoaTiet": item.maHoaTiet
-    }
-
+# =========================================================
+# DETECT AI
+# =========================================================
 
 @router.post("/detect")
-async def detect(
-
+async def analyze_image_for_form(
     file: UploadFile = File(...),
-
     db: Session = Depends(get_db)
 ):
 
-    result = await detect_clothing( file, db )
+    try:
 
-    return result
+        if not file.content_type.startswith("image/"):
 
+            raise HTTPException(
+
+                status_code=400,
+
+                detail="File tải lên phải là ảnh"
+            )
+
+        ai_result = await detect_clothing(
+            file,
+            db
+        )
+
+        return {
+
+            "status": "success",
+
+            "message":
+            "Phân tích trang phục thành công",
+
+            "data":
+            ai_result
+        }
+
+    except Exception as e:
+
+        traceback.print_exc()
+
+        raise HTTPException(
+
+            status_code=500,
+
+            detail=f"Lỗi detect AI: {str(e)}"
+        )
+
+
+# =========================================================
+# THÊM TRANG PHỤC
+# =========================================================
 
 @router.post("/them")
-async def them_trang_phuc(
-
-    file: UploadFile = File(...),
-
-    tenTrangPhuc: str = Form(...),
-
-    maLoai: int = Form(...),
-
-    maMau: int = Form(...),
-
-    maHoaTiet: int = Form(...),
-
-    maNguoiDung: int = Form(...),
-
+def create_trang_phuc(
+    payload: TrangPhucCreate,
     db: Session = Depends(get_db)
 ):
 
-    image_url = upload_image(file)
+    try:
 
-    item = TrangPhuc(
+        new_trang_phuc = TrangPhuc(
 
-        tenTrangPhuc=tenTrangPhuc,
+            tenTrangPhuc=
+            payload.tenTrangPhuc,
 
-        hinhAnh=image_url,
+            hinhAnh=
+            payload.hinhAnh,
 
-        maLoai=maLoai,
+            maMau=
+            payload.maMau,
 
-        maMau=maMau,
+            maHoaTiet=
+            payload.maHoaTiet,
 
-        maHoaTiet=maHoaTiet,
+            maLoai=
+            payload.maLoai,
 
-        maNguoiDung=maNguoiDung
-    )
+            maNguoiDung=
+            payload.maNguoiDung,
 
-    db.add(item)
+            kieuDang=
+            payload.kieuDang
+        )
 
-    db.commit()
+        db.add(new_trang_phuc)
 
-    db.refresh(item)
+        db.commit()
+
+        db.refresh(new_trang_phuc)
+
+        return {
+
+            "status": "success",
+
+            "message":
+            "Thêm trang phục thành công",
+
+            "data": {
+
+                "maTrangPhuc":
+                new_trang_phuc.maTrangPhuc,
+
+                "tenTrangPhuc":
+                new_trang_phuc.tenTrangPhuc,
+
+                "hinhAnh":
+                new_trang_phuc.hinhAnh
+            }
+        }
+
+    except Exception as e:
+
+        traceback.print_exc()
+
+        db.rollback()
+
+        raise HTTPException(
+
+            status_code=500,
+
+            detail=f"Lỗi lưu DB: {str(e)}"
+        )
 
 
-    return {
+# =========================================================
+# GET ALL
+# =========================================================
 
-        "message": "Thêm trang phục thành công",
+@router.get("/")
+def get_all_trang_phuc(
+    db: Session = Depends(get_db)
+):
 
-        "imageUrl": image_url
-    }
+    try:
+
+        ds_trang_phuc = db.query(
+            TrangPhuc
+        ).options(
+
+            joinedload(
+                TrangPhuc.loai
+            ).joinedload(
+                LoaiTrangPhuc.danhMuc
+            )
+
+        ).all()
+
+        result = []
+
+        for item in ds_trang_phuc:
+
+            result.append({
+
+                "maTrangPhuc":
+                item.maTrangPhuc,
+
+                "tenTrangPhuc":
+                item.tenTrangPhuc,
+
+                "hinhAnh":
+                item.hinhAnh,
+
+                "tenDanhMuc":
+
+                item.loai
+                .danhMuc
+                .tenDanhMuc
+
+                if item.loai
+                and item.loai.danhMuc
+
+                else ""
+            })
+
+        return result
+
+    except Exception as e:
+
+        traceback.print_exc()
+
+        raise HTTPException(
+
+            status_code=500,
+
+            detail=f"Lỗi get all: {str(e)}"
+        )
 
 
-@router.put("/{ma_trang_phuc}")
-async def update_trang_phuc(
+# =========================================================
+# GET BY USER
+# =========================================================
 
+@router.get("/user/{ma_nguoi_dung}")
+def get_trang_phuc_by_user(
+    ma_nguoi_dung: int,
+    db: Session = Depends(get_db)
+):
+
+    try:
+
+        ds_trang_phuc = db.query(
+            TrangPhuc
+        ).options(
+
+            joinedload(
+                TrangPhuc.loai
+            ).joinedload(
+                LoaiTrangPhuc.danhMuc
+            )
+
+        ).filter(
+
+            TrangPhuc.maNguoiDung
+            == ma_nguoi_dung
+
+        ).all()
+
+        result = []
+
+        for item in ds_trang_phuc:
+
+            result.append({
+
+                "maTrangPhuc":
+                item.maTrangPhuc,
+
+                "tenTrangPhuc":
+                item.tenTrangPhuc,
+
+                "hinhAnh":
+                item.hinhAnh,
+
+                "tenDanhMuc":
+
+                item.loai
+                .danhMuc
+                .tenDanhMuc
+
+                if item.loai
+                and item.loai.danhMuc
+
+                else ""
+            })
+
+        return result
+
+    except Exception as e:
+
+        traceback.print_exc()
+
+        raise HTTPException(
+
+            status_code=500,
+
+            detail=f"Lỗi get by user: {str(e)}"
+        )
+
+
+# =========================================================
+# GET BY ID
+# =========================================================
+
+@router.get("/{ma_trang_phuc}")
+def get_trang_phuc_by_id(
     ma_trang_phuc: int,
-
-    data: dict,
-
     db: Session = Depends(get_db)
 ):
 
-    item = db.query(
-        TrangPhuc
-    ).filter(
+    try:
 
-        TrangPhuc.maTrangPhuc
-        == ma_trang_phuc
+        trang_phuc = db.query(
+            TrangPhuc
+        ).filter(
 
-    ).first()
+            TrangPhuc.maTrangPhuc
+            == ma_trang_phuc
 
+        ).first()
 
+        if not trang_phuc:
 
-    if not item:
+            raise HTTPException(
+
+                status_code=404,
+
+                detail="Không tìm thấy trang phục"
+            )
 
         return {
-            "message": "Không tìm thấy"
+
+            "maTrangPhuc":
+            trang_phuc.maTrangPhuc,
+
+            "tenTrangPhuc":
+            trang_phuc.tenTrangPhuc,
+
+            "hinhAnh":
+            trang_phuc.hinhAnh,
+
+            "maLoai":
+            trang_phuc.maLoai,
+
+            "maMau":
+            trang_phuc.maMau,
+
+            "maHoaTiet":
+            trang_phuc.maHoaTiet,
+
+            "maNguoiDung":
+            trang_phuc.maNguoiDung,
+
+            "kieuDang":
+            trang_phuc.kieuDang
         }
 
+    except Exception as e:
+
+        traceback.print_exc()
+
+        raise HTTPException(
+
+            status_code=500,
+
+            detail=f"Lỗi get by id: {str(e)}"
+        )
 
 
-    item.tenTrangPhuc = data["tenTrangPhuc"]
+# =========================================================
+# UPDATE
+# =========================================================
 
-    item.maLoai = data["maLoai"]
-
-    item.maMau = data["maMau"]
-
-
-
-    db.commit()
-
-
-
-    return {
-        "message": "Cập nhật thành công"
-    }
-
-
-@router.delete("/{maTrangPhuc}")
-def xoa_trang_phuc(
-
-    maTrangPhuc: int,
-
+@router.put("/cap-nhat/{ma_trang_phuc}")
+def update_trang_phuc(
+    ma_trang_phuc: int,
+    payload: TrangPhucCreate,
     db: Session = Depends(get_db)
 ):
 
-    item = db.query(
-        TrangPhuc
-    ).filter(
-        TrangPhuc.maTrangPhuc == maTrangPhuc
-    ).first()
+    try:
 
-    # Không tìm thấy
-    if not item:
+        trang_phuc = db.query(
+            TrangPhuc
+        ).filter(
+
+            TrangPhuc.maTrangPhuc
+            == ma_trang_phuc
+
+        ).first()
+
+        if not trang_phuc:
+
+            raise HTTPException(
+
+                status_code=404,
+
+                detail="Không tìm thấy trang phục"
+            )
+
+        trang_phuc.tenTrangPhuc = (
+            payload.tenTrangPhuc
+        )
+
+        trang_phuc.hinhAnh = (
+            payload.hinhAnh
+        )
+
+        trang_phuc.maLoai = (
+            payload.maLoai
+        )
+
+        trang_phuc.maMau = (
+            payload.maMau
+        )
+
+        trang_phuc.maHoaTiet = (
+            payload.maHoaTiet
+        )
+
+        trang_phuc.maNguoiDung = (
+            payload.maNguoiDung
+        )
+
+        trang_phuc.kieuDang = (
+            payload.kieuDang
+        )
+
+        db.commit()
+
+        db.refresh(trang_phuc)
 
         return {
-            "message": "Không tìm thấy trang phục"
+
+            "status": "success",
+
+            "message":
+            "Cập nhật thành công",
+
+            "data": {
+
+                "maTrangPhuc":
+                trang_phuc.maTrangPhuc
+            }
         }
 
-    # Xóa
-    db.delete(item)
+    except Exception as e:
 
-    db.commit()
+        traceback.print_exc()
 
-    return {
-        "message": "Xóa trang phục thành công"
-    }
+        db.rollback()
+
+        raise HTTPException(
+
+            status_code=500,
+
+            detail=f"Lỗi update: {str(e)}"
+        )
+
+
+# =========================================================
+# DELETE
+# =========================================================
+
+@router.delete("/{ma_trang_phuc}")
+def delete_trang_phuc(
+    ma_trang_phuc: int,
+    db: Session = Depends(get_db)
+):
+
+    try:
+
+        trang_phuc = db.query(
+            TrangPhuc
+        ).filter(
+
+            TrangPhuc.maTrangPhuc
+            == ma_trang_phuc
+
+        ).first()
+
+        if not trang_phuc:
+
+            raise HTTPException(
+
+                status_code=404,
+
+                detail="Không tìm thấy trang phục"
+            )
+
+        db.delete(trang_phuc)
+
+        db.commit()
+
+        return {
+
+            "status": "success",
+
+            "message":
+            "Xóa trang phục thành công"
+        }
+
+    except Exception as e:
+
+        traceback.print_exc()
+
+        db.rollback()
+
+        raise HTTPException(
+
+            status_code=500,
+
+            detail=f"Lỗi delete: {str(e)}"
+        )
+    
+    

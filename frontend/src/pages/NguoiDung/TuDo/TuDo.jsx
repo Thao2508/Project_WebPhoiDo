@@ -59,6 +59,14 @@ export default function TuDo() {
 
   const [goiYOutfits, setGoiYOutfits] = useState([]);
 
+  const [goiYMessage, setGoiYMessage] = useState("");
+
+  const [loadingPhoiDo, setLoadingPhoiDo] = useState(false);
+
+  const [openSuggestDrawer, setOpenSuggestDrawer] = useState(false);
+
+  const maNguoiDung = parseInt(localStorage.getItem("maNguoiDung"));
+
   useEffect(() => {
 
     fetchTrangPhuc();
@@ -75,12 +83,15 @@ export default function TuDo() {
 
   }, []);
 
+
   const fetchTrangPhuc = async () => {
 
     try {
 
       const response = await fetch(
-        "http://localhost:8000/trang-phuc/"
+
+        `http://localhost:8000/trang-phuc/user/${maNguoiDung}`
+
       );
 
       const data = await response.json();
@@ -94,6 +105,8 @@ export default function TuDo() {
       console.log(error);
     }
   };
+
+
 
   const fetchDanhMuc = async () => {
 
@@ -196,14 +209,47 @@ export default function TuDo() {
     ]);
   };
 
-  const handleOpenUpdate = (item, e) => {
+
+  const handleOpenUpdate = async (
+    item,
+    e
+  ) => {
 
     e.stopPropagation();
 
-    setSelectedItem(item);
+    try {
 
-    setOpenDialog(true);
+      const response = await fetch(
+
+        `http://localhost:8000/trang-phuc/${item.maTrangPhuc}`
+
+      );
+
+      const data = await response.json();
+
+      setSelectedItem(data);
+
+      setFormData({
+
+        tenTrangPhuc:
+          data.tenTrangPhuc,
+
+        maLoai:
+          data.maLoai,
+
+        maMau:
+          data.maMau
+      });
+
+      setOpenDialog(true);
+
+    } catch (error) {
+
+      console.log(error);
+    }
   };
+
+
 
   const handleSearch = (
 
@@ -245,46 +291,51 @@ export default function TuDo() {
 
       const response = await fetch(
 
-        `http://localhost:8000/trang-phuc/${selectedItem.maTrangPhuc}`,
+        `http://localhost:8000/trang-phuc/cap-nhat/${selectedItem.maTrangPhuc}`,
 
         {
+
           method: "PUT",
 
           headers: {
-            "Content-Type": "application/json"
+
+            "Content-Type":
+            "application/json"
           },
 
           body: JSON.stringify({
 
             tenTrangPhuc:
-              formData.tenTrangPhuc,
+            formData.tenTrangPhuc,
+
+            hinhAnh:
+            selectedItem.hinhAnh,
 
             maLoai:
-              parseInt(formData.maLoai),
+            parseInt(formData.maLoai),
 
             maMau:
-              parseInt(formData.maMau)
+            parseInt(formData.maMau),
+
+            maHoaTiet:
+            selectedItem.maHoaTiet,
+
+            maNguoiDung:
+            selectedItem.maNguoiDung,
+
+            kieuDang:
+            selectedItem.kieuDang
           })
         }
       );
-
-
 
       const data = await response.json();
 
       alert(data.message);
 
-
-
-      // reload list
       fetchTrangPhuc();
 
-
-
-      // close dialog
       setOpenDialog(false);
-
-
 
     } catch (error) {
 
@@ -292,11 +343,25 @@ export default function TuDo() {
     }
   };
 
-  const handlePhoiDo = async () => {
 
-    // =========================
-    // VALIDATE
-    // =========================
+  const handleCloseSuggest = () => {
+
+    setIsSelecting(false);
+
+    setOpenSuggestDrawer(false);
+
+    setSelectedOutfit([]);
+
+    setGoiYOutfits([]);
+
+    setGoiYMessage("");
+
+    setSelectedPhongCach("");
+
+    setSelectedDip("");
+  };
+
+  const handlePhoiDo = async () => {
 
     if (selectedOutfit.length === 0) {
 
@@ -321,8 +386,16 @@ export default function TuDo() {
 
     try {
 
-      // clear old result
+      setLoadingPhoiDo(true);
+
       setGoiYOutfits([]);
+
+      setGoiYMessage("");
+
+      const maNguoiDung =
+        localStorage.getItem(
+          "maNguoiDung"
+        );
 
       const response = await fetch(
 
@@ -334,7 +407,8 @@ export default function TuDo() {
 
           headers: {
 
-            "Content-Type": "application/json"
+            "Content-Type":
+            "application/json"
           },
 
           body: JSON.stringify({
@@ -342,57 +416,73 @@ export default function TuDo() {
             selectedItems:
 
               selectedOutfit.map(
-                (item) => item.maTrangPhuc
+                (item) =>
+                item.maTrangPhuc
               ),
 
             maPhongCach:
-              parseInt(selectedPhongCach),
+              parseInt(
+                selectedPhongCach
+              ),
 
             maDipSD:
               parseInt(selectedDip),
 
-            maNguoiDung: 1
+            maNguoiDung:
+              parseInt(maNguoiDung)
           })
         }
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
       console.log(data);
 
-      // =========================
-      // FAIL
-      // =========================
-
       if (!data.success) {
 
-        alert(data.message);
+        alert(
+          data.message ||
+          "Có lỗi xảy ra"
+        );
 
         return;
       }
 
-      // =========================
-      // FALLBACK
-      // =========================
+      if (
+        !data.data ||
+        data.data.length === 0
+      ) {
 
-      if (data.fallback) {
+        alert(
+          "Không tìm thấy outfit phù hợp"
+        );
 
-        alert(data.message);
+        return;
       }
 
-      // =========================
-      // SUCCESS
-      // =========================
-
       setGoiYOutfits(
-        data.outfits
+        data.data || []
       );
+
+      setGoiYMessage(
+        data.message || ""
+      );
+
+      setSelectedPhongCach("");
+      setSelectedDip("");
 
     } catch (error) {
 
       console.log(error);
+
+      alert("Lỗi kết nối server");
+    }
+    finally {
+      setLoadingPhoiDo(false);
     }
   };
+
 
   return (
 
@@ -419,6 +509,7 @@ export default function TuDo() {
               onClick={() => {
 
                 setIsSelecting(true);
+                setOpenSuggestDrawer(true);
               }}
             >
 
@@ -536,150 +627,38 @@ export default function TuDo() {
           }
 
         </div>
-
-        {/* SELECTED BAR */}
-
-        {
-        isSelecting && (
-
-          <div className="selected-bar">
-
-            <div>
-
-              <h3>
-                Đang phối đồ từ tủ đồ
-              </h3>
-
-              <p>
-
-                Vui lòng chọn ít nhất
-                1 áo và 1 quần/váy để phối
-
-              </p>
-
-            </div>
-
-            <div className="match-options">
-
-              {/* PHONG CACH */}
-
-              <select
-
-                value={selectedPhongCach}
-
-                onChange={(e) =>
-                  setSelectedPhongCach(
-                    e.target.value
-                  )
-                }
-              >
-
-                <option value="">
-                  Chọn phong cách
-                </option>
-
-                {
-                  phongCach.map((item) => (
-
-                    <option
-
-                      key={item.maPhongCach}
-
-                      value={item.maPhongCach}
-                    >
-
-                      {item.tenPhongCach}
-
-                    </option>
-                  ))
-                }
-
-              </select>
-
-              {/* DIP */}
-
-              <select
-
-                value={selectedDip}
-
-                onChange={(e) =>
-                  setSelectedDip(
-                    e.target.value
-                  )
-                }
-              >
-
-                <option value="">
-                  Chọn dịp sử dụng
-                </option>
-
-                {
-                  dipSuDung.map((item) => (
-
-                    <option
-
-                      key={item.maDipSD}
-
-                      value={item.maDipSD}
-                    >
-
-                      {item.tenDipSD}
-
-                    </option>
-                  ))
-                }
-
-              </select>
-
-            </div>
-
-            <div className="select-actions">
-
-              <button
-                className="cancel-select-btn"
-
-                onClick={() => {
-
-                  setIsSelecting(false);
-
-                  setSelectedOutfit([]);
-                }}
-              >
-
-                Hủy
-
-              </button>
-
-              {
-                selectedOutfit.length > 0 && (
-
-                  <button
-                  className="match-btn" 
-                  onClick={handlePhoiDo}>
-
-                    <Shirt size={18} />
-
-                    <span>
-                      Phối đồ ngay
-                    </span>
-
-                  </button>
-                )
-              }
-
-            </div>
-
-          </div>
-        )
-      }
-
-
+      
         {/* GRID */}
+        <div
+          className={
+            openSuggestDrawer
+              ? "closet-layout"
+              : "closet-full"
+          }
+        >
+
+        <div className="closet-left">
 
         <div className="td-grid">
 
-          {
-            filteredData.map((item) => {
+        {
+        filteredData.length === 0 ? (
+
+          <div className="empty-closet">
+
+            <h2>
+              Tủ đồ của bạn đang trống
+            </h2>
+
+            <p>
+              Hãy thêm trang phục để bắt đầu phối đồ
+            </p>
+
+          </div>
+
+        ) : (
+
+      filteredData.map((item) => {
 
               const isSelected = selectedOutfit.some(
                 (i) => i.maTrangPhuc === item.maTrangPhuc
@@ -816,86 +795,248 @@ export default function TuDo() {
 
                 </div>
               );
-            })
+            }))
           }
 
         </div>
-{/*  */}
+        </div>
+
+
         {
-        goiYOutfits.length > 0 && (
+        openSuggestDrawer && (
 
-          <div className="goiy-section">
+          <div className="closet-right">
 
-            <div className="goiy-header">
+          <div className="goiy-section suggest-panel">
+
+            <div className="suggest-header">
 
               <h2>
-                Outfit gợi ý
+                Gợi ý phối đồ
               </h2>
 
-              {
-                goiYOutfits.some(
-                  item => item.fallback
-                ) && (
-
-                  <p className="fallback-message">
-                    {
-                      goiYOutfits[0]?.message
-                    }
-                  </p>
-                )
-              }
+              <button
+                className="close-suggest"
+                onClick={handleCloseSuggest}
+              >
+                <X size={18} />
+              </button>
 
             </div>
 
-            <div className="goiy-grid">
+            {/* FORM */}
 
-              {
-                goiYOutfits.map(
+            <div className="suggest-form">
 
-                  (outfit, index) => (
+              <select
+                value={selectedPhongCach}
+                onChange={(e) =>
+                  setSelectedPhongCach(
+                    e.target.value
+                  )
+                }
+              >
 
-                    <div
-                      className="goiy-card"
-                    
-                      key={index}
+                <option value="">
+                  Chọn phong cách
+                </option>
+
+                {
+                  phongCach.map((item) => (
+
+                    <option
+                      key={item.maPhongCach}
+                      value={item.maPhongCach}
                     >
 
-                      
-                      {
-                        outfit.items.map((item) => (
+                      {item.tenPhongCach}
 
-                          <div
-                            className="goiy-item"
+                    </option>
+                  ))
+                }
 
-                            key={
-                              item.maTrangPhuc
-                            }
-                          >
+              </select>
 
-                            <img
-                              src={item.hinhAnh}
-                              alt=""
-                            />
-
-                            <p>
-                              {item.tenTrangPhuc}
-                            </p>
-
-                          </div>
-                        ))
-                      }
-
-                    </div>
+              <select
+                value={selectedDip}
+                onChange={(e) =>
+                  setSelectedDip(
+                    e.target.value
                   )
-                )
-              }
+                }
+              >
+
+                <option value="">
+                  Chọn dịp sử dụng
+                </option>
+
+                {
+                  dipSuDung.map((item) => (
+
+                    <option
+                      key={item.maDipSD}
+                      value={item.maDipSD}
+                    >
+
+                      {item.tenDipSD}
+
+                    </option>
+                  ))
+                }
+
+              </select>
 
             </div>
 
-          </div>
-        )
-      }
+            <button
+              className="suggest-btn"
+              onClick={handlePhoiDo}
+              disabled={loadingPhoiDo}
+            >
 
+              <Shirt size={18} />
+
+              <span>
+
+                {
+                  loadingPhoiDo
+                    ? "Đang phối..."
+                    : "Phối đồ ngay"
+                }
+
+              </span>
+
+            </button>
+
+            {
+              goiYMessage && (
+
+                <p className="fallback-message">
+                  {goiYMessage}
+                </p>
+              )
+            }
+            <div className="suggest-result">
+          
+          {
+          goiYOutfits.map((group, groupIndex) => {
+
+            if (
+              !group ||
+              !group.outfits ||
+              group.outfits.length === 0
+            ) {
+              return null;
+            }
+
+            return (
+
+              <div
+                key={groupIndex}
+                className="fallback-group"
+              >
+
+                {/* CONTEXT */}
+
+                <div className="fallback-context">
+
+                  <h3>
+
+                    {group?.context?.tenPhongCach || "Outfit"}
+
+                    {
+                      group?.context?.tenDipSuDung
+                        ? ` - ${group.context.tenDipSuDung}`
+                        : ""
+                    }
+
+                  </h3>
+
+                </div>
+
+                {/* GRID */}
+
+                <div className="goiy-grid">
+
+                  {
+                    group.outfits.map((outfit, index) => (
+
+                      <div
+                        className="goiy-card"
+                        key={`${groupIndex}-${index}`}
+                      >
+
+                        <div className="goiy-items">
+
+                          {/* ÁO */}
+
+                          {
+                            outfit?.ao && (
+
+                              <div className="goiy-item">
+
+                                {
+                                  outfit?.ao?.hinhAnh && (
+
+                                    <img
+                                      src={outfit.ao.hinhAnh}
+                                      alt=""
+                                    />
+                                  )
+                                }
+
+                                <p>
+                                  {outfit?.ao?.tenTrangPhuc || ""}
+                                </p>
+
+                              </div>
+                            )
+                          }
+
+                          {/* QUẦN */}
+
+                          {
+                            outfit?.quan && (
+
+                              <div className="goiy-item">
+
+                                {
+                                  outfit?.quan?.hinhAnh && (
+
+                                    <img
+                                      src={outfit.quan.hinhAnh}
+                                      alt=""
+                                    />
+                                  )
+                                }
+
+                                <p>
+                                  {outfit?.quan?.tenTrangPhuc || ""}
+                                </p>
+
+                              </div>
+                            )
+                          }
+
+                        </div>
+
+                      </div>
+                    ))
+                  }
+
+                </div>
+                
+              </div>
+            );
+          })
+        }
+          </div>
+        </div>
+        </div>
+        )
+        }
+
+        </div>
       </div>
 
       {/* UPDATE DIALOG */}

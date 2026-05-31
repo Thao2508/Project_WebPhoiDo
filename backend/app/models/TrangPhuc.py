@@ -1,8 +1,8 @@
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
-from sqlalchemy import Text
 from sqlalchemy import ForeignKey
+from sqlalchemy import Text
 
 from sqlalchemy.orm import relationship
 
@@ -26,7 +26,7 @@ class TrangPhuc(Base):
 
     hinhAnh = Column(
         Text,
-        nullable=True
+        nullable=False
     )
 
     maMau = Column(
@@ -43,23 +43,26 @@ class TrangPhuc(Base):
 
     maLoai = Column(
         Integer,
-        ForeignKey("loai_trang_phuc.maLoai"),
+        ForeignKey(
+            "loai_trang_phuc.maLoai"
+        ),
         nullable=False
     )
 
     maNguoiDung = Column(
         Integer,
-        ForeignKey("nguoi_dung.maNguoiDung"),
+        ForeignKey(
+            "nguoi_dung.maNguoiDung"
+        ),
         nullable=False
     )
 
-    mau = relationship(
-        "Mau",
-        back_populates="trangPhucs"
+    kieuDang = Column(
+        String(100),
+        nullable=True
     )
-
-    hoaTiet = relationship(
-        "HoaTiet",
+    nguoiDung = relationship(
+        "NguoiDung",
         back_populates="trangPhucs"
     )
 
@@ -68,9 +71,12 @@ class TrangPhuc(Base):
         back_populates="trangPhucs"
     )
 
-    nguoiDung = relationship(
-        "NguoiDung",
-        back_populates="trangPhucs"
+    mau = relationship(
+        "Mau"
+    )
+
+    hoaTiet = relationship(
+        "HoaTiet"
     )
 
     chiTietBoPhois = relationship(

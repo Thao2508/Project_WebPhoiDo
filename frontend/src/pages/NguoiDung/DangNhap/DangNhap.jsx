@@ -27,12 +27,15 @@ export default function DangNhap() {
   const navigate = useNavigate();
 
   // ĐĂNG NHẬP
+
   const handleDangNhap = async () => {
 
-    // KIỂM TRA RỖNG
+    // CHECK RỖNG
     if (!email || !matKhau) {
 
-      alert("Vui lòng nhập đầy đủ thông tin");
+      alert(
+        "Vui lòng nhập đầy đủ thông tin"
+      );
 
       return;
     }
@@ -41,51 +44,82 @@ export default function DangNhap() {
 
       setLoading(true);
 
-      // GỌI API
+      // CALL API
       const response = await axios.post(
 
         "http://127.0.0.1:8000/api/auth/dangnhap",
 
         {
+
           email: email.trim(),
 
           matKhau: matKhau.trim()
         }
       );
 
-      // ĐĂNG NHẬP THÀNH CÔNG
-      if (response.data.success) {
+      const data = response.data;
 
-          const user =
-            response.data.user;
+      // LOGIN SUCCESS
+      if (data.success) {
 
-          // CHẶN ADMIN
+        const user = data.user;
 
-          if (user.vaiTro === 1) {
+        // CHẶN ADMIN
 
-            alert(
-              "Vui lòng đăng nhập bằng trang quản trị"
-            );
+        if (user.vaiTro === 1) {
 
-            return;
-          }
-
-          // LƯU USER
-
-          localStorage.setItem(
-            "user",
-            JSON.stringify(user)
+          alert(
+            "Vui lòng đăng nhập bằng trang quản trị"
           );
 
-          alert("Đăng nhập thành công");
-
-          navigate("/");
+          return;
         }
 
-      // THẤT BẠI
+        // =====================================================
+        // LƯU LOCAL STORAGE
+        // =====================================================
+
+        // FULL USER
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify(user)
+        );
+
+        // TÁCH RIÊNG CÁC FIELD QUAN TRỌNG
+
+        localStorage.setItem(
+          "maNguoiDung",
+          user.maNguoiDung
+        );
+
+        localStorage.setItem(
+          "tenDangNhap",
+          user.tenDangNhap
+        );
+
+        localStorage.setItem(
+          "email",
+          user.email
+        );
+
+        localStorage.setItem(
+          "vaiTro",
+          user.vaiTro
+        );
+
+        alert("Đăng nhập thành công");
+
+        navigate("/");
+      }
+
+      // LOGIN FAIL
       else {
 
-        alert(response.data.message);
+        alert(
+          data.message ||
+          "Sai email hoặc mật khẩu"
+        );
       }
 
     }
@@ -94,7 +128,23 @@ export default function DangNhap() {
 
       console.log(error);
 
-      alert("Lỗi server");
+      // BACKEND ERROR MESSAGE
+
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.detail
+      ) {
+
+        alert(
+          error.response.data.detail
+        );
+      }
+
+      else {
+
+        alert("Lỗi server");
+      }
     }
 
     finally {
@@ -102,6 +152,8 @@ export default function DangNhap() {
       setLoading(false);
     }
   };
+
+
 
   return (
 

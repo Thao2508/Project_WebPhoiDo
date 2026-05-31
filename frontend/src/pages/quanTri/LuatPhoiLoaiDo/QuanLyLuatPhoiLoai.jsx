@@ -45,6 +45,9 @@ export default function QuanLyLuatLoaiDo() {
   const [rules,setRules] =
   useState([]);
 
+  const [keyword, setKeyword] =
+  useState("");
+
   const [danhMucs,setDanhMucs] =
     useState([]);
 
@@ -180,6 +183,24 @@ async()=>{
         alert("Xóa thất bại");
       }
     };
+
+    const filteredRules =
+    rules.filter((rule) => {
+
+      const text =
+        `
+        ${rule.tenLoai1}
+        ${rule.tenLoai2}
+        ${rule.tenPhongCach}
+        ${rule.tenDipSD}
+        `
+        .toLowerCase();
+
+      return text.includes(
+        keyword.toLowerCase()
+      );
+    });
+
   return (
 
     <div className="quanlyluatloai">
@@ -224,6 +245,10 @@ async()=>{
           <input
             type="text"
             placeholder="Tìm kiếm..."
+            value={keyword}
+            onChange={(e)=>
+              setKeyword(e.target.value)
+            }
           />
 
         </div>
@@ -257,7 +282,7 @@ async()=>{
               <tbody>
 
                 {
-                  rules.map((rule) => (
+                  filteredRules.map((rule) => (
 
                     <tr key={rule.maLuat}>
 

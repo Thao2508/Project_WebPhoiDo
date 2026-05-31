@@ -1,644 +1,1073 @@
-from itertools import product
+import colorsys
 
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_
 
-from sqlalchemy import and_
-
-from sqlalchemy import or_
-
+from app.db.database import SessionLocal
 from app.models.TrangPhuc import TrangPhuc
-
+from app.models.PhongCach import PhongCach
+from app.models.DipSuDung import DipSuDung
+from app.models.LuatPhoiMau import LuatPhoiMau
 from app.models.LuatPhoiLoaiDo import LuatPhoiLoaiDo
 
-from app.models.LuatPhoiMau import LuatPhoiMau
-
-
-# ====================================
-# KIEM TRA HOP LE
-# ====================================
-
-def hop_le(
-
-    db,
-
-    top,
-
-    bottom,
-
-    ma_phong_cach,
-
-    ma_dip
-):
-
-    # ====================================
-    # KIEM TRA LOAI
-    # ====================================
-
-    loai_rule = db.query(
-        LuatPhoiLoaiDo
-    ).filter(
-
-        or_(
-
-            and_(
-
-                LuatPhoiLoaiDo.maLoai_1
-                == top.maLoai,
-
-                LuatPhoiLoaiDo.maLoai_2
-                == bottom.maLoai
-            ),
-
-            and_(
-
-                LuatPhoiLoaiDo.maLoai_1
-                == bottom.maLoai,
-
-                LuatPhoiLoaiDo.maLoai_2
-                == top.maLoai
-            )
-        ),
-
-        LuatPhoiLoaiDo.maPhongCach
-        == ma_phong_cach,
-
-        LuatPhoiLoaiDo.maDipSD
-        == ma_dip,
-
-        LuatPhoiLoaiDo.hopLe == True
-
-    ).first()
-
-    if not loai_rule:
-
-        return False
-
-    # ====================================
-    # KIEM TRA MAU
-    # ====================================
-
-    mau_rule = db.query(
-        LuatPhoiMau
-    ).filter(
-
-        or_(
-
-            and_(
-
-                LuatPhoiMau.maMau_1
-                == top.maMau,
-
-                LuatPhoiMau.maMau_2
-                == bottom.maMau
-            ),
-
-            and_(
-
-                LuatPhoiMau.maMau_1
-                == bottom.maMau,
-
-                LuatPhoiMau.maMau_2
-                == top.maMau
-            )
-        ),
-
-        LuatPhoiMau.maPhongCach
-        == ma_phong_cach,
-
-        LuatPhoiMau.maDipSD
-        == ma_dip,
-
-        LuatPhoiMau.hopLe == True
-
-    ).first()
-
-    return mau_rule is not None
-
-
-# ====================================
-# TIM BEST MATCH
-# ====================================
-
-def tim_best_match(
-
-    db,
-
-    top,
-
-    bottom
-):
-
-    loai_rule = db.query(
-        LuatPhoiLoaiDo
-    ).filter(
-
-        or_(
-
-            and_(
-
-                LuatPhoiLoaiDo.maLoai_1
-                == top.maLoai,
-
-                LuatPhoiLoaiDo.maLoai_2
-                == bottom.maLoai
-            ),
-
-            and_(
-
-                LuatPhoiLoaiDo.maLoai_1
-                == bottom.maLoai,
-
-                LuatPhoiLoaiDo.maLoai_2
-                == top.maLoai
-            )
-        ),
-
-        LuatPhoiLoaiDo.hopLe == True
-
-    ).first()
-
-    if not loai_rule:
-
-        return None
-
-    mau_rule = db.query(
-        LuatPhoiMau
-    ).filter(
-
-        or_(
-
-            and_(
-
-                LuatPhoiMau.maMau_1
-                == top.maMau,
-
-                LuatPhoiMau.maMau_2
-                == bottom.maMau
-            ),
-
-            and_(
-
-                LuatPhoiMau.maMau_1
-                == bottom.maMau,
-
-                LuatPhoiMau.maMau_2
-                == top.maMau
-            )
-        ),
-
-        LuatPhoiMau.hopLe == True
-
-    ).first()
-
-    if not mau_rule:
-
-        return None
-
-    return {
-
-        "maPhongCach":
-        loai_rule.maPhongCach,
-
-        "tenPhongCach":
-        loai_rule.phongCach.tenPhongCach,
-
-        "maDipSD":
-        loai_rule.maDipSD,
-
-        "tenDipSD":
-        loai_rule.dipSuDung.tenDipSD
-    }
-
-
-# ====================================
-# TACH THAN TREN / THAN DUOI
-# ====================================
-
-def tach_top_bottom(items):
-
-    tops = []
-
-    bottoms = []
-
-    for item in items:
-
-        pham_vi = (
+router = APIRouter()
+
+MAX_PRIMARY_OUTFIT = 10
+MAX_FALLBACK_OUTFIT = 5
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+INVALID_STYLE_RULES = {
+    "Công sở": [
+        "croptop",
+        "rách",
+        "baggy",
+        "oversize"
+    ],
+    "Sang trọng": [
+        "rách",
+        "baggy",
+        "oversize"
+    ],
+    "Cổ điển": [
+        "rách"
+    ],
+    "Tối giản": [
+        "rách"
+    ]
+}
+
+INVALID_OCCASION_RULES = {
+    "Đi học": [
+        "croptop"
+    ],
+
+    "Đi làm": [
+        "croptop",
+        "rách"
+    ],
+
+    "Dự tiệc": [],
+
+    "Thể thao": [
+        "xếp ly"
+    ]
+}
+
+
+def get_pham_vi(item):
+    try:
+        return (
             item.loai
             .danhMuc
             .phamViSuDung
             .lower()
+            .strip()
+        )
+    except Exception as e:
+        print(f"[ERROR] Lỗi cấu trúc quan hệ danh mục của item {getattr(item, 'maTrangPhuc', 'Unknown')}: {e}")
+        return ""
+
+
+def is_top(item):
+    return get_pham_vi(item) == "thân trên"
+
+
+def is_bottom(item):
+    return get_pham_vi(item) == "thân dưới"
+
+def get_harmony_type(top, bottom):
+
+    if not top.mau or not bottom.mau:
+        return None
+
+    try:
+
+        top_hex = top.mau.maMauHex.lstrip("#")
+        bottom_hex = bottom.mau.maMauHex.lstrip("#")
+
+        r1 = int(top_hex[0:2], 16) / 255
+        g1 = int(top_hex[2:4], 16) / 255
+        b1 = int(top_hex[4:6], 16) / 255
+
+        r2 = int(bottom_hex[0:2], 16) / 255
+        g2 = int(bottom_hex[2:4], 16) / 255
+        b2 = int(bottom_hex[4:6], 16) / 255
+
+    except:
+        return None
+
+    h1, _, _ = colorsys.rgb_to_hsv(r1, g1, b1)
+    h2, _, _ = colorsys.rgb_to_hsv(r2, g2, b2)
+
+    h1 = h1 * 360
+    h2 = h2 * 360
+
+    diff = abs(h1 - h2)
+
+    diff = min(diff, 360 - diff)
+
+    # Monochromatic
+    if diff <= 15:
+        return "monochromatic"
+
+    # Analogous
+    if 15 < diff <= 60:
+        return "analogous"
+
+    # Complementary
+    if 150 <= diff <= 210:
+        return "complementary"
+
+    return None
+
+def get_hsv_from_hex(hex_color):
+
+    if not hex_color:
+        return None
+
+    hex_color = hex_color.lstrip("#")
+
+    try:
+
+        r = int(hex_color[0:2], 16) / 255
+        g = int(hex_color[2:4], 16) / 255
+        b = int(hex_color[4:6], 16) / 255
+
+        h, s, v = colorsys.rgb_to_hsv(
+            r,
+            g,
+            b
         )
 
-        # ------------------------
-        # THAN TREN
-        # ------------------------
+        return h, s, v
 
-        if pham_vi == "thân trên":
+    except:
 
-            tops.append(item)
+        return None
 
-        # ------------------------
-        # THAN DUOI
-        # ------------------------
+def is_same_tone_family(top, bottom):
 
-        elif pham_vi == "thân dưới":
+    if not top.mau or not bottom.mau:
+        return False
 
-            bottoms.append(item)
-
-    return tops, bottoms
-
-
-# ====================================
-# RESPONSE ITEM
-# ====================================
-
-def item_response(item):
-
-    return {
-
-        "maTrangPhuc":
-        item.maTrangPhuc,
-
-        "tenTrangPhuc":
-        item.tenTrangPhuc,
-
-        "hinhAnh":
-        item.hinhAnh,
-
-        "tenLoai":
-        item.loai.tenLoai,
-
-        "tenMau":
-        item.mau.tenMau,
-
-        "tenDanhMuc":
-        item.loai
-        .danhMuc
-        .tenDanhMuc
-    }
-
-
-# ====================================
-# RESPONSE OUTFIT
-# ====================================
-
-def tao_outfit_response(
-
-    top,
-
-    bottom
-):
-
-    return {
-
-        "items": [
-
-            item_response(top),
-
-            item_response(bottom)
-        ]
-    }
-
-
-# ====================================
-# GOI Y PHOI DO
-# ====================================
-
-def goi_y_phoi_do(
-
-    db: Session,
-
-    selected_items,
-
-    ma_phong_cach,
-
-    ma_dip,
-
-    ma_nguoi_dung
-):
-
-    # ====================================
-    # LAY ITEM USER CHON
-    # ====================================
-
-    selected_clothes = db.query(
-        TrangPhuc
-    ).filter(
-        TrangPhuc.maTrangPhuc.in_(
-            selected_items
-        )
-    ).all()
-
-    if not selected_clothes:
-
-        return {
-
-            "success": False,
-
-            "message":
-            "Không có trang phục được chọn"
-        }
-
-    # ====================================
-    # TACH TOP / BOTTOM
-    # ====================================
-
-    selected_tops, selected_bottoms = (
-        tach_top_bottom(
-            selected_clothes
-        )
+    hsv_top = get_hsv_from_hex(
+        top.mau.maMauHex
     )
 
-    final_outfits = []
+    hsv_bottom = get_hsv_from_hex(
+        bottom.mau.maMauHex
+    )
 
-    # ====================================
-    # CASE 1
-    # USER CHON TOP + BOTTOM
-    # ====================================
+    if not hsv_top or not hsv_bottom:
+        return False
 
-    if (
+    _, s1, v1 = hsv_top
+    _, s2, v2 = hsv_bottom
 
-        len(selected_tops) > 0 and
+    saturation_diff = abs(s1 - s2)
+    brightness_diff = abs(v1 - v2)
 
-        len(selected_bottoms) > 0
-    ):
+    # lệch tone quá mạnh
+    if saturation_diff > 0.35:
+        return False
 
-        combinations = list(
-            product(
-                selected_tops,
-                selected_bottoms
-            )
-        )
+    if brightness_diff > 0.4:
+        return False
 
-        for top, bottom in combinations:
+    return True
 
-            valid = hop_le(
 
-                db,
 
-                top,
+def is_bold_color(item):
+    if not item.mau:
+        return False
 
-                bottom,
+    try:
 
-                ma_phong_cach,
+        hex_color = item.mau.maMauHex.lstrip("#")
 
-                ma_dip
-            )
+        r = int(hex_color[0:2], 16) / 255
+        g = int(hex_color[2:4], 16) / 255
+        b = int(hex_color[4:6], 16) / 255
 
-            if valid:
+    except:
+        return False
 
-                response = tao_outfit_response(
+    _, s, v = colorsys.rgb_to_hsv(
+        r,
+        g,
+        b
+    )
 
-                    top,
+    return s > 0.7 and v > 0.7
 
-                    bottom
-                )
 
-                response["fallback"] = False
+def validate_harmony_context(harmony_type, top, bottom, ma_phong_cach, ma_dip_sd):
+    if not harmony_type:
+        return False
+    if ma_dip_sd in [1, 2]:
 
-                final_outfits.append(
-                    response
-                )
-
-    # ====================================
-    # CASE 2
-    # USER CHI CHON TOP
-    # ====================================
-
-    elif len(selected_tops) > 0:
-
-        all_clothes = db.query(
-            TrangPhuc
-        ).filter(
-
-            TrangPhuc.maNguoiDung
-            == ma_nguoi_dung
-
-        ).all()
-
-        _, all_bottoms = (
-            tach_top_bottom(
-                all_clothes
-            )
-        )
-
-        combinations = list(
-            product(
-                selected_tops,
-                all_bottoms
-            )
-        )
-
-        for top, bottom in combinations:
+        if harmony_type == "complementary":
 
             if (
-                bottom.maTrangPhuc
-                in selected_items
+                is_bold_color(top)
+                or
+                is_bold_color(bottom)
             ):
 
-                continue
+                return False
 
-            valid = hop_le(
+    if ma_phong_cach == 1:
 
-                db,
+        if (
+            is_bold_color(top)
+            or
+            is_bold_color(bottom)
+        ):
 
-                top,
+            return False
 
-                bottom,
+    if ma_phong_cach == 3:
 
-                ma_phong_cach,
+        if harmony_type == "complementary":
 
-                ma_dip
+            return False
+
+    return True
+
+
+
+def validate_style(top, bottom, phong_cach_name):
+    invalid_styles = INVALID_STYLE_RULES.get(phong_cach_name, [])
+    invalid_styles = [s.lower().strip() for s in invalid_styles]
+
+    top_style = (
+        top.kieuDang.lower().strip()
+        if top.kieuDang else ""
+    )
+
+    bottom_style = (
+        bottom.kieuDang.lower().strip()
+        if bottom.kieuDang else ""
+    )
+
+    for invalid in invalid_styles:
+        if invalid in top_style:
+            return False
+        if invalid in bottom_style:
+            return False
+
+    return True
+
+def validate_occasion(top, bottom, dip_name):
+
+    invalid_styles = INVALID_OCCASION_RULES.get(dip_name, [])
+
+    invalid_styles = [
+        s.lower().strip()
+        for s in invalid_styles
+    ]
+
+    top_style = (
+        top.kieuDang.lower().strip()
+        if top.kieuDang else ""
+    )
+
+    bottom_style = (
+        bottom.kieuDang.lower().strip()
+        if bottom.kieuDang else ""
+    )
+
+    for invalid in invalid_styles:
+
+        if invalid in top_style:
+            return False
+
+        if invalid in bottom_style:
+            return False
+
+    return True
+
+def hop_le(
+    db,
+    top,
+    bottom,
+    ma_phong_cach,
+    ma_dip_sd,
+    use_harmony_fallback=False
+):
+
+    # =========================
+    # RULE LOẠI ĐỒ
+    # =========================
+
+    loai_rule = db.query(
+        LuatPhoiLoaiDo
+    ).filter(
+
+        or_(
+            and_(
+                LuatPhoiLoaiDo.maLoai_1 == top.maLoai,
+                LuatPhoiLoaiDo.maLoai_2 == bottom.maLoai
+            ),
+
+            and_(
+                LuatPhoiLoaiDo.maLoai_1 == bottom.maLoai,
+                LuatPhoiLoaiDo.maLoai_2 == top.maLoai
             )
+        ),
 
-            if valid:
+        LuatPhoiLoaiDo.maPhongCach == ma_phong_cach,
 
-                response = tao_outfit_response(
+        LuatPhoiLoaiDo.maDipSD == ma_dip_sd,
 
-                    top,
+        LuatPhoiLoaiDo.hopLe == True
 
-                    bottom
-                )
+    ).first()
 
-                response["fallback"] = False
+    # STRICT MODE
+    if not loai_rule:
+        return False
 
-                final_outfits.append(
-                    response
-                )
+    # =========================
+    # RULE MÀU
+    # =========================
 
-    # ====================================
-    # CASE 3
-    # USER CHI CHON BOTTOM
-    # ====================================
+    mau_rule = db.query(
+        LuatPhoiMau
+    ).filter(
 
-    elif len(selected_bottoms) > 0:
+        or_(
+            and_(
+                LuatPhoiMau.maMau_1 == top.maMau,
+                LuatPhoiMau.maMau_2 == bottom.maMau
+            ),
 
-        all_clothes = db.query(
-            TrangPhuc
-        ).filter(
-
-            TrangPhuc.maNguoiDung
-            == ma_nguoi_dung
-
-        ).all()
-
-        all_tops, _ = (
-            tach_top_bottom(
-                all_clothes
+            and_(
+                LuatPhoiMau.maMau_1 == bottom.maMau,
+                LuatPhoiMau.maMau_2 == top.maMau
             )
+        ),
+
+        LuatPhoiMau.maPhongCach == ma_phong_cach,
+
+        LuatPhoiMau.maDipSD == ma_dip_sd,
+
+        LuatPhoiMau.hopLe == True
+
+    ).first()
+
+    # =========================
+    # KHÔNG CÓ LUẬT MÀU
+    # =========================
+
+    if not mau_rule:
+
+        # chỉ fallback harmony
+        # ở phase cuối
+
+        if not use_harmony_fallback:
+            return False
+
+        harmony_type = get_harmony_type(
+            top,
+            bottom
         )
 
-        combinations = list(
-            product(
-                all_tops,
-                selected_bottoms
-            )
-        )
+        if not harmony_type:
+            return False
 
-        for top, bottom in combinations:
+        if not is_same_tone_family(
+            top,
+            bottom
+        ):
+            return False
+
+        if not validate_harmony_context(
+            harmony_type,
+            top,
+            bottom,
+            ma_phong_cach,
+            ma_dip_sd
+        ):
+            return False
+
+    # =========================
+    # STYLE VALIDATION
+    # =========================
+
+    phong_cach = db.query(
+        PhongCach
+    ).filter(
+        PhongCach.maPhongCach == ma_phong_cach
+    ).first()
+
+    if phong_cach:
+
+        if not validate_style(
+            top,
+            bottom,
+            phong_cach.tenPhongCach
+        ):
+            return False
+
+    # =========================
+    # OCCASION VALIDATION
+    # =========================
+
+    dip = db.query(
+        DipSuDung
+    ).filter(
+        DipSuDung.maDipSD == ma_dip_sd
+    ).first()
+
+    if dip:
+
+        if not validate_occasion(
+            top,
+            bottom,
+            dip.tenDipSD
+        ):
+            return False
+
+    return True
+    
+
+def tao_outfit(
+    db,
+    tops,
+    bottoms,
+    ma_phong_cach,
+    ma_dip_sd,
+    use_harmony_fallback=False,
+    must_contain_selected=False,
+    selected_ids=None
+):
+
+    ket_qua = []
+
+    seen_pairs = set()
+
+    for top in tops:
+
+        for bottom in bottoms:
 
             if (
                 top.maTrangPhuc
-                in selected_items
+                ==
+                bottom.maTrangPhuc
             ):
-
                 continue
 
-            valid = hop_le(
+            # phải chứa item user chọn
+            if must_contain_selected:
 
+                if (
+                    top.maTrangPhuc not in selected_ids
+                    and
+                    bottom.maTrangPhuc not in selected_ids
+                ):
+                    continue
+
+            pair_key = (
+                top.maTrangPhuc,
+                bottom.maTrangPhuc
+            )
+
+            if pair_key in seen_pairs:
+                continue
+
+            if hop_le(
                 db,
-
                 top,
-
                 bottom,
-
                 ma_phong_cach,
+                ma_dip_sd,
+                use_harmony_fallback
+            ):
 
-                ma_dip
+                seen_pairs.add(pair_key)
+
+                ket_qua.append({
+
+                    "ao": {
+                        "maTrangPhuc": top.maTrangPhuc,
+                        "tenTrangPhuc": top.tenTrangPhuc,
+                        "hinhAnh": top.hinhAnh
+                    },
+
+                    "quan": {
+                        "maTrangPhuc": bottom.maTrangPhuc,
+                        "tenTrangPhuc": bottom.tenTrangPhuc,
+                        "hinhAnh": bottom.hinhAnh
+                    }
+                })
+
+                if len(ket_qua) >= MAX_PRIMARY_OUTFIT:
+                    return ket_qua
+
+    return ket_qua
+
+def goi_y_phoi_do(
+    db,
+    selected_items,
+    ma_phong_cach,
+    ma_dip_sd,
+    ma_nguoi_dung
+    ):
+
+    all_items = db.query(TrangPhuc).filter(
+        TrangPhuc.maNguoiDung == ma_nguoi_dung
+    ).all()
+
+    selected_trang_phuc = db.query(TrangPhuc).filter(
+        TrangPhuc.maTrangPhuc.in_(selected_items)
+    ).all()
+
+    print("\n" + "★" * 30)
+    print("=== [DEBUG SERVICE] BẮT ĐẦU PHÂN LOẠI ===")
+
+    tops = []
+    bottoms = []
+
+    # =========================
+    # PHÂN LOẠI TOP/BOTTOM
+    # =========================
+
+    for item in selected_trang_phuc:
+
+        if is_top(item):
+            tops.append(item)
+
+        elif is_bottom(item):
+            bottoms.append(item)
+
+    print(
+        f"TOPS: {[t.tenTrangPhuc for t in tops]}"
+    )
+
+    print(
+        f"BOTTOMS: {[b.tenTrangPhuc for b in bottoms]}"
+    )
+
+    print("" + "★" * 30 + "\n")
+
+    fallback_message = None
+
+    # =========================
+    # PHASE 1
+    # EXACT DB RULE
+    # =========================
+
+    ket_qua = tao_outfit(
+        db,
+        tops,
+        bottoms,
+        ma_phong_cach,
+        ma_dip_sd,
+        use_harmony_fallback=False,
+        must_contain_selected=True,
+        selected_ids=selected_items
+    )
+
+    # =========================
+    # PHASE 2
+    # HARMONY FALLBACK
+    # =========================
+
+    if not ket_qua:
+
+        print(
+            "\n[PHASE 2] "
+            "Mở rộng outfit từ tủ đồ..."
+        )
+
+        expanded_results = []
+
+        # giữ top user chọn
+        if tops:
+
+            extra_bottoms = [
+                item for item in all_items
+                if (
+                    is_bottom(item)
+                    and
+                    item.maTrangPhuc
+                    not in selected_items
+                )
+            ]
+
+            expanded_results += tao_outfit(
+                db,
+                tops,
+                extra_bottoms,
+                ma_phong_cach,
+                ma_dip_sd,
+                use_harmony_fallback=False,
+                must_contain_selected=True,
+                selected_ids=selected_items
             )
 
-            if valid:
+        # giữ bottom user chọn
+        if bottoms:
 
-                response = tao_outfit_response(
-
-                    top,
-
-                    bottom
+            extra_tops = [
+                item for item in all_items
+                if (
+                    is_top(item)
+                    and
+                    item.maTrangPhuc
+                    not in selected_items
                 )
+            ]
 
-                response["fallback"] = False
-
-                final_outfits.append(
-                    response
-                )
-
-    # ====================================
-    # TIM BEST MATCH
-    # ====================================
-
-    if len(final_outfits) == 0:
-
-        best_outfits = []
-
-        if (
-
-            len(selected_tops) > 0 and
-
-            len(selected_bottoms) > 0
-        ):
-
-            combinations = list(
-                product(
-                    selected_tops,
-                    selected_bottoms
-                )
+            expanded_results += tao_outfit(
+                db,
+                extra_tops,
+                bottoms,
+                ma_phong_cach,
+                ma_dip_sd,
+                use_harmony_fallback=False,
+                must_contain_selected=True,
+                selected_ids=selected_items
             )
 
-            for top, bottom in combinations:
+        ket_qua = expanded_results[
+            :MAX_PRIMARY_OUTFIT
+        ]
 
-                best_match = tim_best_match(
+    # =========================
+    # PHASE 3
+    # EXPAND WARDROBE
+    # luôn giữ item user chọn
+    # =========================
 
+    if not ket_qua:
+
+        print(
+            "\n[PHASE 3] "
+            "Mở rộng outfit từ tủ đồ..."
+        )
+
+        expanded_results = []
+
+        # giữ top
+        if tops:
+
+            extra_bottoms = [
+                item for item in all_items
+                if (
+                    is_bottom(item)
+                    and
+                    item.maTrangPhuc
+                    not in selected_items
+                )
+            ]
+
+            expanded_results += tao_outfit(
+                db,
+                tops,
+                extra_bottoms,
+                ma_phong_cach,
+                ma_dip_sd,
+                use_harmony_fallback=True,
+                must_contain_selected=True,
+                selected_ids=selected_items
+            )
+
+        # giữ bottom
+        if bottoms:
+
+            extra_tops = [
+                item for item in all_items
+                if (
+                    is_top(item)
+                    and
+                    item.maTrangPhuc
+                    not in selected_items
+                )
+            ]
+
+            expanded_results += tao_outfit(
+                db,
+                extra_tops,
+                bottoms,
+                ma_phong_cach,
+                ma_dip_sd,
+                use_harmony_fallback=True,
+                must_contain_selected=True,
+                selected_ids=selected_items
+            )
+
+        ket_qua = expanded_results[
+            :MAX_PRIMARY_OUTFIT
+        ]
+
+    # =========================
+    # PHASE 4
+    # GROUP FALLBACK CONTEXT
+    # =========================
+
+    fallback_message = None
+
+    if not ket_qua:
+
+        print(
+            "\n[PHASE 4] "
+            "Fallback theo từng context..."
+        )
+
+        # =========================
+        # COLLECT CONTEXT
+        # =========================
+
+        context_counter = {}
+
+        # TOP
+        for top in tops:
+
+            compatible_rules = db.query(
+                LuatPhoiLoaiDo
+            ).filter(
+
+                or_(
+                    LuatPhoiLoaiDo.maLoai_1 == top.maLoai,
+                    LuatPhoiLoaiDo.maLoai_2 == top.maLoai
+                ),
+
+                LuatPhoiLoaiDo.hopLe == True
+
+            ).all()
+
+            for rule in compatible_rules:
+
+                context_key = (
+                    rule.maPhongCach,
+                    rule.maDipSD
+                )
+
+                if context_key not in context_counter:
+
+                    context_counter[
+                        context_key
+                    ] = []
+
+                context_counter[
+                    context_key
+                ].append(rule)
+
+        # BOTTOM
+        for bottom in bottoms:
+
+            compatible_rules = db.query(
+                LuatPhoiLoaiDo
+            ).filter(
+
+                or_(
+                    LuatPhoiLoaiDo.maLoai_1 == bottom.maLoai,
+                    LuatPhoiLoaiDo.maLoai_2 == bottom.maLoai
+                ),
+
+                LuatPhoiLoaiDo.hopLe == True
+
+            ).all()
+
+            for rule in compatible_rules:
+
+                context_key = (
+                    rule.maPhongCach,
+                    rule.maDipSD
+                )
+
+                if context_key not in context_counter:
+
+                    context_counter[
+                        context_key
+                    ] = []
+
+                context_counter[
+                    context_key
+                ].append(rule)
+
+        # =========================
+        # GENERATE THEO TỪNG CONTEXT
+        # =========================
+
+        fallback_groups = []
+
+        for context_key in context_counter.keys():
+
+            style_id, dip_id = context_key
+
+            phong_cach = db.query(
+                PhongCach
+            ).filter(
+                PhongCach.maPhongCach
+                == style_id
+            ).first()
+
+            dip = db.query(
+                DipSuDung
+            ).filter(
+                DipSuDung.maDipSD
+                == dip_id
+            ).first()
+
+            context_outfits = []
+
+            seen_pairs = set()
+
+            # =========================
+            # GENERATE THEO TOP
+            # =========================
+
+            if tops:
+
+                extra_bottoms = [
+                    item for item in all_items
+                    if (
+                        is_bottom(item)
+                        and
+                        item.maTrangPhuc
+                        not in selected_items
+                    )
+                ]
+
+                outfit_res = tao_outfit(
                     db,
-
-                    top,
-
-                    bottom
+                    tops,
+                    extra_bottoms,
+                    style_id,
+                    dip_id,
+                    True
                 )
 
-                if best_match:
+                for outfit in outfit_res:
 
-                    response = tao_outfit_response(
-
-                        top,
-
-                        bottom
+                    pair_key = (
+                        outfit["ao"]["maTrangPhuc"],
+                        outfit["quan"]["maTrangPhuc"]
                     )
 
-                    response["fallback"] = True
+                    if pair_key not in seen_pairs:
 
-                    response["message"] = (
+                        seen_pairs.add(pair_key)
 
-                        f"Không tìm thấy outfit phù hợp với "
-                        f"phong cách đã chọn. "
+                        context_outfits.append(
+                            outfit
+                        )
 
-                        f"Đã gợi ý outfit theo phong cách "
+            # =========================
+            # GENERATE THEO BOTTOM
+            # =========================
 
-                        f"{best_match['tenPhongCach']} "
+            if bottoms:
 
-                        f"và dịp "
+                extra_tops = [
+                    item for item in all_items
+                    if (
+                        is_top(item)
+                        and
+                        item.maTrangPhuc
+                        not in selected_items
+                    )
+                ]
 
-                        f"{best_match['tenDipSD']}."
+                outfit_res = tao_outfit(
+                    db,
+                    extra_tops,
+                    bottoms,
+                    style_id,
+                    dip_id,
+                    True
+                )
+
+                for outfit in outfit_res:
+
+                    pair_key = (
+                        outfit["ao"]["maTrangPhuc"],
+                        outfit["quan"]["maTrangPhuc"]
                     )
 
-                    response["maPhongCach"] = (
-                        best_match["maPhongCach"]
-                    )
+                    if pair_key not in seen_pairs:
 
-                    response["maDipSD"] = (
-                        best_match["maDipSD"]
-                    )
+                        seen_pairs.add(pair_key)
 
-                    best_outfits.append(
-                        response
-                    )
+                        context_outfits.append(
+                            outfit
+                        )
 
-        if len(best_outfits) > 0:
+            # =========================
+            # CONTEXT CÓ OUTFIT
+            # =========================
 
-            return {
+            if context_outfits:
 
-                "success": True,
+                fallback_groups.append({
 
-                "fallback": True,
+                    "context": {
 
-                "message":
+                        "maPhongCach": style_id,
 
-                "Đã tìm thấy outfit gần phù hợp nhất.",
+                        "tenPhongCach": (
+                            phong_cach.tenPhongCach
+                            if phong_cach else None
+                        ),
+
+                        "maDipSuDung": dip_id,
+
+                        "tenDipSuDung": (
+                            dip.tenDipSD
+                            if dip else None
+                        )
+                    },
+
+                    "outfits": context_outfits[
+                        :MAX_FALLBACK_OUTFIT
+                    ]
+                })
+
+                # GIỚI HẠN CONTEXT
+                if len(fallback_groups) >= 3:
+                    break
+
+        ket_qua = fallback_groups
+
+        # =========================
+        # MESSAGE FALLBACK
+        # =========================
+
+        if fallback_groups:
+
+            fallback_message = (
+                "Không tìm thấy outfit phù hợp "
+                "với phong cách và dịp sử dụng đã chọn. Gợi ý cho bạn 1 số outfit tham khảo"
+            )
+
+
+    # =========================
+    # PHASE 5
+    # HARMONY FALLBACK CUỐI
+    # =========================
+
+    if not ket_qua:
+
+        print(
+            "\n[PHASE 5] "
+            "Harmony fallback cuối cùng..."
+        )
+
+        extra_tops = [
+            item for item in all_items
+            if is_top(item)
+        ]
+
+        extra_bottoms = [
+            item for item in all_items
+            if is_bottom(item)
+        ]
+
+        harmony_results = tao_outfit(
+            db,
+            extra_tops,
+            extra_bottoms,
+            ma_phong_cach,
+            ma_dip_sd,
+            use_harmony_fallback=True,
+            must_contain_selected=True,
+            selected_ids=selected_items
+        )
+
+        if harmony_results:
+
+            ket_qua = [{
+
+                "context": {
+
+                    "tenPhongCach":
+                    "Harmony fallback",
+
+                    "tenDipSuDung":
+                    "Fallback"
+                },
 
                 "outfits":
-                best_outfits
-            }
+                harmony_results
+            }]
 
-        return {
+            fallback_message = (
+                "Không tìm thấy outfit "
+                "đúng luật trong database. "
+                "Hiển thị outfit gần đúng "
+                "theo harmony màu."
+            )
+    # =========================
+    # KHÔNG CÓ OUTFIT NÀO
+    # =========================
 
-            "success": False,
+    if not ket_qua:
 
-            "message":
-            "Không tìm thấy outfit phù hợp"
-        }
+        fallback_message = (
+            "Không tìm thấy outfit phù hợp. "
+            "Tủ đồ hiện tại có thể chưa đủ "
+            "trang phục phù hợp với phong cách "
+            "và dịp sử dụng đã chọn."
+        )
 
-    # ====================================
-    # SUCCESS
-    # ====================================
+    if ket_qua and isinstance(ket_qua, list):
 
+        # phase 1-3 trả raw outfit
+        if "ao" in ket_qua[0]:
+
+            phong_cach = db.query(
+                PhongCach
+            ).filter(
+                PhongCach.maPhongCach == ma_phong_cach
+            ).first()
+
+            dip = db.query(
+                DipSuDung
+            ).filter(
+                DipSuDung.maDipSD == ma_dip_sd
+            ).first()
+
+            ket_qua = [{
+
+                "context": {
+
+                    "maPhongCach": ma_phong_cach,
+
+                    "tenPhongCach": (
+                        phong_cach.tenPhongCach
+                        if phong_cach else ""
+                    ),
+
+                    "maDipSuDung": ma_dip_sd,
+
+                    "tenDipSuDung": (
+                        dip.tenDipSD
+                        if dip else ""
+                    )
+                },
+
+                "outfits": ket_qua
+            }]
+            
     return {
 
         "success": True,
 
-        "fallback": False,
+        "message": fallback_message,
 
-        "message":
-        "Gợi ý phối đồ thành công",
-
-        "outfits":
-        final_outfits
+        "data": ket_qua
     }
+

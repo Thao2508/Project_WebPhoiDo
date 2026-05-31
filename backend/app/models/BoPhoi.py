@@ -54,6 +54,12 @@ class BoPhoi(Base):
         Boolean,
         default=True
     )
+
+    maNguoiDung = Column(
+    Integer,
+    ForeignKey("nguoi_dung.maNguoiDung")
+)
+    
     luatPhoiLoaiDo = relationship(
         "LuatPhoiLoaiDo"
     )
@@ -70,4 +76,9 @@ class BoPhoi(Base):
     yeuThichs = relationship(
         "YeuThich",
         back_populates="boPhoi"
+    )
+
+    nguoiDung = relationship(
+        "NguoiDung",
+        back_populates="boPhois"
     )
