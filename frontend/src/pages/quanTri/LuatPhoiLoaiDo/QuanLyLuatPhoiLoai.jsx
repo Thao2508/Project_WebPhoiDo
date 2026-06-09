@@ -6,7 +6,6 @@ import {
   Plus,
   Search,
   Pencil,
-  Trash2,
   Shirt,
   Shapes,
   CheckCircle2,
@@ -146,33 +145,61 @@ async()=>{
       }
     };
 
-    const handleDeleteRule =
-    async(id)=>{
+    const handleDisableRule =
+    async(rule)=>{
 
-      const confirmDelete =
+      const confirmUpdate =
         window.confirm(
-          "Bạn có chắc muốn xóa?"
+
+          rule.hopLe
+
+          ? "Bạn có chắc muốn vô hiệu hóa luật này?"
+
+          : "Bạn có chắc muốn kích hoạt lại luật này?"
         );
 
-      if(!confirmDelete){
+      if(!confirmUpdate){
         return;
       }
 
       try{
 
         const response =
-          await axios.delete(
-            `http://127.0.0.1:8000/luat-phoi-loai/${id}`
+          await axios.put(
+
+            `http://127.0.0.1:8000/luat-phoi-loai/${rule.maLuat}`,
+
+            {
+
+              maLoai_1:
+              rule.maLoai_1,
+
+              maLoai_2:
+              rule.maLoai_2,
+
+              maPhongCach:
+              rule.maPhongCach,
+
+              maDipSD:
+              rule.maDipSD,
+
+              hopLe:
+              !rule.hopLe
+            }
           );
 
         if(!response.data.success){
 
-          alert("Xóa thất bại");
+          alert(
+            "Cập nhật trạng thái thất bại"
+          );
 
           return;
         }
 
-        alert("Xóa thành công");
+        alert(
+          "Cập nhật trạng thái thành công"
+        );
 
         layDanhSachLuat();
 
@@ -180,7 +207,9 @@ async()=>{
 
         console.log(error);
 
-        alert("Xóa thất bại");
+        alert(
+          "Cập nhật trạng thái thất bại"
+        );
       }
     };
 
@@ -355,13 +384,6 @@ async()=>{
                           >
 
                             <Pencil size={17} />
-
-                          </button>
-
-                          <button className="icon-btn delete-btn" onClick={()=>
-                            handleDeleteRule(rule.maLuat)}>
-
-                            <Trash2 size={17} />
 
                           </button>
 

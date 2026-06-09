@@ -30,7 +30,9 @@ export default function UpdateLoaiDialog({
 
       tenLoai:"",
 
-      maDanhMuc:""
+      maDanhMuc:"",
+
+      tuKhoaNhanDien:""
     });
 
   /* LOAD */
@@ -45,7 +47,10 @@ export default function UpdateLoaiDialog({
         loai.tenLoai,
 
         maDanhMuc:
-        loai.maDanhMuc
+        loai.maDanhMuc,
+
+        tuKhoaNhanDien:
+        loai.tuKhoaNhanDien || ""
       });
     }
 
@@ -120,7 +125,10 @@ export default function UpdateLoaiDialog({
             formData.tenLoai,
 
             maDanhMuc:
-            Number(formData.maDanhMuc)
+            Number(formData.maDanhMuc),
+
+            tuKhoaNhanDien:
+            formData.tuKhoaNhanDien
           }
         );
 
@@ -250,6 +258,30 @@ export default function UpdateLoaiDialog({
               }
 
             </select>
+
+          </div>
+
+          <div className="update-group">
+            <label>
+              Từ khóa nhận diện
+            </label>
+
+            <textarea
+
+              placeholder=
+              "Ví dụ: sơ mi trắng, áo cổ bẻ, tay dài..."
+
+              value={
+                formData.tuKhoaNhanDien
+              }
+
+              onChange={(e)=>
+                handleChange(
+                  "tuKhoaNhanDien",
+                  e.target.value
+                )
+              }
+            />
 
           </div>
 

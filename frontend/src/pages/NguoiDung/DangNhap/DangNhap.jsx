@@ -47,7 +47,7 @@ export default function DangNhap() {
       // CALL API
       const response = await axios.post(
 
-        "http://127.0.0.1:8000/api/auth/dangnhap",
+        "http://127.0.0.1:8000/auth/dangnhap",
 
         {
 

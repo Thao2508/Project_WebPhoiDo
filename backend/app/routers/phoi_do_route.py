@@ -7,7 +7,7 @@ from app.services.phoi_do_service import goi_y_phoi_do
 
 router = APIRouter(
     prefix="/phoi-do",
-    tags=["Phối đồ"]
+    tags=["PhoiDo"]
 )
 
 
@@ -27,21 +27,41 @@ def goi_y_phoi_do_route(
     request: GoiYPhoiDoRequest,
     db: Session = Depends(get_db)
 ):
-    # ================== ĐOẠN CODE DEBUG ĐƯỢC CHÈN VÀO ==================
+
     print("\n" + "="*50)
-    print("=== [DEBUG] FRONTEND GỬI DATA LÊN ROUTER ===")
-    print(f"-> selectedItems (Danh sách ID đồ): {request.selectedItems}")
-    print(f"-> maPhongCach (ID Phong cách)   : {request.maPhongCach}")
-    print(f"-> maDipSD (ID Dịp sử dụng)      : {request.maDipSD}")
-    print(f"-> maNguoiDung (ID Người dùng)   : {request.maNguoiDung}")
+
+    print("=== DEBUG REQUEST ===")
+
+    print("selectedItems:",
+          request.selectedItems)
+
+    print("items:",
+          request.items)
+
+    print("maPhongCach:",
+          request.maPhongCach)
+
+    print("maDipSD:",
+          request.maDipSD)
+
     print("="*50 + "\n")
-    # ===================================================================
 
     return goi_y_phoi_do(
-        db=db,
-        selected_items=request.selectedItems,
-        ma_phong_cach=request.maPhongCach,
-        ma_dip_sd=request.maDipSD,
-        ma_nguoi_dung=request.maNguoiDung
-    )
 
+        db=db,
+
+        selected_items=
+        request.selectedItems,
+
+        uploaded_items=
+        request.items,
+
+        ma_phong_cach=
+        request.maPhongCach,
+
+        ma_dip_sd=
+        request.maDipSD,
+
+        ma_nguoi_dung=
+        request.maNguoiDung
+    )

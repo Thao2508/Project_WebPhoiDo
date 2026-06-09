@@ -11,6 +11,7 @@ import PhoiDo from "../pages/NguoiDung/PhoiDo/PhoiDo";
 import TuDo from "../pages/NguoiDung/TuDo/TuDo";
 import ThemTrangPhuc from "../pages/NguoiDung/TuDo/ThemTrangPhuc";
 import YeuThich from "../pages/NguoiDung/YeuThich/YeuThich";
+import TrangCaNhan from "../pages/NguoiDung/TrangCaNhan/TrangCaNhan";
 
 import DangNhapAdmin from "../pages/quanTri/DangNhapAdmin/DangNhapAdmin";
 import QlyTaiKhoan from "../pages/quanTri/TaiKhoan/QlyTaiKhoan";
@@ -21,6 +22,7 @@ import QuanLyLuatPhoiLoai from "../pages/quanTri/LuatPhoiLoaiDo/QuanLyLuatPhoiLo
 import ThemQuyTacLoai from "../pages/quanTri/LuatPhoiLoaiDo/ThemQuytacLoai";
 import CapNhatPhongCach from "../pages/quanTri/PhongCach/CapNhatPhongCach";
 import CapNhatDipSD from "../pages/quanTri/DipSD/CapNhatDipSD";
+
 
 export default function AllRoute() {
   return (
@@ -54,6 +56,10 @@ export default function AllRoute() {
         <Route
           path="/yeuthich"
           element={<YeuThich />}
+        />
+        <Route
+          path="/trangcanhan"
+          element={<TrangCaNhan />}
         />
         <Route
           path="/quantri"

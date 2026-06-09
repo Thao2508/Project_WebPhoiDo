@@ -6,7 +6,75 @@ import { Link } from "react-router-dom";
 export default function DangKy() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [tenDangNhap, setTenDangNhap] = useState("");
+  const [email, setEmail] = useState("");
+  const [matKhau, setMatKhau] = useState("");
+  const [xacNhanMatKhau, setXacNhanMatKhau] = useState("");
 
+  const handleDangKy = async () => {
+
+    if (
+      !tenDangNhap ||
+      !email ||
+      !matKhau
+    ) {
+      alert("Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+
+    if (matKhau !== xacNhanMatKhau) {
+      alert("Mật khẩu xác nhận không khớp");
+      return;
+    }
+
+    try {
+
+      const response = await fetch(
+        "http://localhost:8000/auth/dangky",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            tenDangNhap,
+            email,
+            matKhau
+          })
+        }
+      );
+
+      const data =
+        await response.json();
+
+      if (data.success) {
+
+        alert(
+          "Đăng ký thành công"
+        );
+
+        window.location.href =
+          "/dangnhap";
+
+      } else {
+
+        alert(data.message);
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Lỗi kết nối server"
+      );
+
+    }
+  };
   return (
     <div className="dk-container">
       <div className="dk-card">
@@ -50,6 +118,10 @@ export default function DangKy() {
             <input
               type="text"
               placeholder="Nhập tên đăng nhập"
+              value={tenDangNhap}
+              onChange={(e) =>
+                setTenDangNhap(e.target.value)
+              }
             />
 
           </div>
@@ -62,6 +134,10 @@ export default function DangKy() {
             <input
               type="email"
               placeholder="Nhập email của bạn"
+              value={email}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
             />
 
           </div>
@@ -76,6 +152,10 @@ export default function DangKy() {
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Nhập mật khẩu"
+                value={matKhau}
+                onChange={(e) =>
+                  setMatKhau(e.target.value)
+                }
               />
 
               <button
@@ -105,6 +185,10 @@ export default function DangKy() {
               <input
                 type={showConfirm ? "text" : "password"}
                 placeholder="Nhập lại mật khẩu"
+                value={xacNhanMatKhau}
+                onChange={(e) =>
+                  setXacNhanMatKhau(e.target.value)
+                }
               />
 
               <button
@@ -125,7 +209,10 @@ export default function DangKy() {
           </div>
 
           {/* BUTTON */}
-          <button className="dk-btn">
+          <button
+            className="dk-btn"
+            onClick={handleDangKy}
+          >
             Đăng ký
           </button>
 

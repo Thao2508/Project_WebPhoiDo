@@ -1,0 +1,208 @@
+.trangcanhan {
+
+  width: 100%;
+
+  min-height: 100vh;
+
+  display: flex;
+
+  background: #f8f6f2;
+}
+
+.trangcanhan-main {
+
+  flex: 1;
+
+  padding: 40px;
+
+  display: flex;
+
+  justify-content: center;
+}
+
+.profile-card {
+
+  width: 100%;
+
+  max-width: 750px;
+
+  background: white;
+
+  border-radius: 28px;
+
+  padding: 36px;
+
+  border: 1px solid #ececec;
+
+  box-shadow:
+    0 10px 30px
+    rgba(0,0,0,0.03);
+}
+
+.profile-top {
+
+  text-align: center;
+
+  margin-bottom: 40px;
+}
+
+.avatar {
+
+  width: 90px;
+
+  height: 90px;
+
+  margin: 0 auto 16px;
+
+  border-radius: 50%;
+
+  background: #f3ecff;
+
+  color: #8b5cf6;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-top h2 {
+
+  font-size: 28px;
+
+  margin-bottom: 8px;
+
+  color: #1f1f1f;
+}
+
+.profile-top p {
+
+  color: #777;
+}
+
+.profile-form {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 20px;
+}
+
+.form-group {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.form-group label {
+
+  font-weight: 600;
+
+  color: #333;
+}
+
+.form-group input,
+.form-group select {
+
+  height: 52px;
+
+  border: 1px solid #e5e5e5;
+
+  border-radius: 14px;
+
+  padding: 0 16px;
+
+  font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+
+  outline: none;
+
+  border-color: #8b5cf6;
+}
+
+.form-row {
+
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 20px;
+}
+
+.update-btn {
+
+  height: 56px;
+
+  border: none;
+
+  border-radius: 16px;
+
+  background: #8b5cf6;
+
+  color: white;
+
+  font-weight: 600;
+
+  font-size: 15px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  cursor: pointer;
+
+  margin-top: 10px;
+}
+
+.update-btn:hover {
+
+  opacity: 0.9;
+}
+
+.profile-header {
+
+  margin-bottom: 20px;
+}
+
+.back-btn {
+
+  height: 42px;
+
+  padding: 0 16px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #f3ecff;
+
+  color: #8b5cf6;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  cursor: pointer;
+
+  font-weight: 600;
+
+  transition: 0.2s;
+}
+
+.back-btn:hover {
+
+  background: #eadcff;
+}

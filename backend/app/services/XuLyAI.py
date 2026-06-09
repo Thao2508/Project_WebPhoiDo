@@ -1,7 +1,3 @@
-# =========================================================
-# services/XuLyAI.py
-# =========================================================
-
 import os
 import requests
 import cloudinary.uploader
@@ -522,19 +518,27 @@ async def detect_clothing(file, db):
         db
     )
 
-
-    # =====================================================
-    # FIND KIỂU DÁNG
-    # =====================================================
-
     kieu_dang = detect_kieu_dang(
         ai_text
     )
 
+    if not loai:
 
-    # =====================================================
-    # RESULT
-    # =====================================================
+        return {
+
+            "status": "fail",
+
+            "message":
+            "Vui lòng upload ảnh chứa một trang phục rõ ràng",
+
+            "data": None
+        }
+
+    print(loai.tenLoai)
+
+    print(loai.danhMuc)
+
+    print(loai.danhMuc.phamViSuDung)
 
     return {
 
@@ -552,9 +556,17 @@ async def detect_clothing(file, db):
 
             "tenLoai":
             loai.tenLoai
-            if loai else None
-        },
+            if loai else None,
 
+            "phamViSuDung":
+
+            (
+                loai.danhMuc.phamViSuDung
+                if loai
+                and loai.danhMuc
+                else None
+            )
+        },
         "mau": {
 
             "maMau":

@@ -12,10 +12,11 @@ from sqlalchemy.orm import (
 )
 
 from app.db.database import get_db
-
+from app.models.Mau import Mau
 from app.models.TrangPhuc import TrangPhuc
 from app.models.LoaiTrangPhuc import LoaiTrangPhuc
-
+from app.models.ChiTietBoPhoi import ChiTietBoPhoi
+from app.models.BoPhoi import BoPhoi
 from app.schemas.trang_phuc_schema import TrangPhucCreate
 
 from app.services.XuLyAI import detect_clothing
@@ -27,9 +28,6 @@ router = APIRouter(
     tags=["TrangPhuc"]
 )
 
-# =========================================================
-# DETECT AI
-# =========================================================
 
 @router.post("/detect")
 async def analyze_image_for_form(
@@ -74,11 +72,6 @@ async def analyze_image_for_form(
 
             detail=f"Lỗi detect AI: {str(e)}"
         )
-
-
-# =========================================================
-# THÊM TRANG PHỤC
-# =========================================================
 
 @router.post("/them")
 def create_trang_phuc(
@@ -151,16 +144,10 @@ def create_trang_phuc(
             detail=f"Lỗi lưu DB: {str(e)}"
         )
 
-
-# =========================================================
-# GET ALL
-# =========================================================
-
 @router.get("/")
 def get_all_trang_phuc(
     db: Session = Depends(get_db)
-):
-
+    ):
     try:
 
         ds_trang_phuc = db.query(
@@ -171,6 +158,12 @@ def get_all_trang_phuc(
                 TrangPhuc.loai
             ).joinedload(
                 LoaiTrangPhuc.danhMuc
+            ),
+
+            joinedload(
+                TrangPhuc.mau
+            ).filter(
+                TrangPhuc.trangThai == True
             )
 
         ).all()
@@ -190,16 +183,53 @@ def get_all_trang_phuc(
                 "hinhAnh":
                 item.hinhAnh,
 
-                "tenDanhMuc":
+                "kieuDang":
+                item.kieuDang,
 
-                item.loai
-                .danhMuc
-                .tenDanhMuc
+                "loai": {
+
+                    "maLoai":
+                    item.loai.maLoai,
+
+                    "tenLoai":
+                    item.loai.tenLoai,
+
+                    "danhMuc": {
+
+                        "maDanhMuc":
+
+                        item.loai
+                        .danhMuc
+                        .maDanhMuc,
+
+                        "tenDanhMuc":
+
+                        item.loai
+                        .danhMuc
+                        .tenDanhMuc
+                    }
+                }
 
                 if item.loai
                 and item.loai.danhMuc
 
-                else ""
+                else None,
+
+                "mau": {
+
+                    "maMau":
+                    item.mau.maMau,
+
+                    "tenMau":
+                    item.mau.tenMau,
+
+                    "maMauHex":
+                    item.mau.maMauHex
+                }
+
+                if item.mau
+
+                else None
             })
 
         return result
@@ -216,16 +246,11 @@ def get_all_trang_phuc(
         )
 
 
-# =========================================================
-# GET BY USER
-# =========================================================
-
 @router.get("/user/{ma_nguoi_dung}")
 def get_trang_phuc_by_user(
     ma_nguoi_dung: int,
     db: Session = Depends(get_db)
-):
-
+    ):
     try:
 
         ds_trang_phuc = db.query(
@@ -236,13 +261,17 @@ def get_trang_phuc_by_user(
                 TrangPhuc.loai
             ).joinedload(
                 LoaiTrangPhuc.danhMuc
+            ),
+
+            joinedload(
+                TrangPhuc.mau
             )
 
         ).filter(
 
-            TrangPhuc.maNguoiDung
-            == ma_nguoi_dung
-
+            TrangPhuc.maNguoiDung == ma_nguoi_dung,
+            TrangPhuc.trangThai == True
+            
         ).all()
 
         result = []
@@ -260,16 +289,53 @@ def get_trang_phuc_by_user(
                 "hinhAnh":
                 item.hinhAnh,
 
-                "tenDanhMuc":
+                "kieuDang":
+                item.kieuDang,
 
-                item.loai
-                .danhMuc
-                .tenDanhMuc
+                "loai": {
+
+                    "maLoai":
+                    item.loai.maLoai,
+
+                    "tenLoai":
+                    item.loai.tenLoai,
+
+                    "danhMuc": {
+
+                        "maDanhMuc":
+
+                        item.loai
+                        .danhMuc
+                        .maDanhMuc,
+
+                        "tenDanhMuc":
+
+                        item.loai
+                        .danhMuc
+                        .tenDanhMuc
+                    }
+                }
 
                 if item.loai
                 and item.loai.danhMuc
 
-                else ""
+                else None,
+
+                "mau": {
+
+                    "maMau":
+                    item.mau.maMau,
+
+                    "tenMau":
+                    item.mau.tenMau,
+
+                    "maMauHex":
+                    item.mau.maMauHex
+                }
+
+                if item.mau
+
+                else None
             })
 
         return result
@@ -284,11 +350,6 @@ def get_trang_phuc_by_user(
 
             detail=f"Lỗi get by user: {str(e)}"
         )
-
-
-# =========================================================
-# GET BY ID
-# =========================================================
 
 @router.get("/{ma_trang_phuc}")
 def get_trang_phuc_by_id(
@@ -315,6 +376,7 @@ def get_trang_phuc_by_id(
 
                 detail="Không tìm thấy trang phục"
             )
+            
 
         return {
 
@@ -355,10 +417,7 @@ def get_trang_phuc_by_id(
         )
 
 
-# =========================================================
 # UPDATE
-# =========================================================
-
 @router.put("/cap-nhat/{ma_trang_phuc}")
 def update_trang_phuc(
     ma_trang_phuc: int,
@@ -446,15 +505,13 @@ def update_trang_phuc(
         )
 
 
-# =========================================================
 # DELETE
-# =========================================================
-
 @router.delete("/{ma_trang_phuc}")
 def delete_trang_phuc(
     ma_trang_phuc: int,
     db: Session = Depends(get_db)
-):
+    ):
+
 
     try:
 
@@ -476,7 +533,31 @@ def delete_trang_phuc(
                 detail="Không tìm thấy trang phục"
             )
 
-        db.delete(trang_phuc)
+        co_trong_bo_phoi = db.query(
+            ChiTietBoPhoi
+        ).filter(
+
+            ChiTietBoPhoi.maTrangPhuc
+            == ma_trang_phuc
+
+        ).first()
+
+
+        if not co_trong_bo_phoi:
+
+            db.delete(trang_phuc)
+
+            db.commit()
+
+            return {
+
+                "status": "success",
+
+                "message":
+                "Đã xóa trang phục khỏi tủ đồ"
+            }
+
+        trang_phuc.trangThai = False
 
         db.commit()
 
@@ -485,8 +566,12 @@ def delete_trang_phuc(
             "status": "success",
 
             "message":
-            "Xóa trang phục thành công"
+            "Đã xóa trang phục khỏi tủ đồ"
         }
+
+    except HTTPException as e:
+
+        raise e
 
     except Exception as e:
 
@@ -500,5 +585,3 @@ def delete_trang_phuc(
 
             detail=f"Lỗi delete: {str(e)}"
         )
-    
-    

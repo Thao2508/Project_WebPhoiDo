@@ -17,6 +17,9 @@ from app.routers.loai_trang_phuc_route import router as loaiTrangPhucRouter
 from app.routers.trang_phuc_route import router as trangPhucRouter
 from app.routers.hoa_tiet_route import router as hoaTietRouter
 from app.routers.phoi_do_route import router as phoiDoRouter
+from app.routers.yeu_thich_route import router as yeuThichRouter
+from app.routers.trang_chu_route import router as trangChuRouter
+from app.routers.trang_ca_nhan_route import router as trangCaNhanRouter
 
 from app.models.Mau import Mau
 from app.models.PhongCach import PhongCach
@@ -31,6 +34,7 @@ from app.models.LuatPhoiLoaiDo import LuatPhoiLoaiDo
 from app.models.YeuThich import YeuThich
 from app.models.BoPhoi import BoPhoi
 from app.models.ChiTietBoPhoi import ChiTietBoPhoi
+
 
 app = FastAPI()
 
@@ -51,7 +55,7 @@ app.add_middleware(
 # ROUTER
 app.include_router(
     auth_router,
-    prefix="/api/auth",
+    prefix="/auth",
     tags=["Auth"]
 )
 
@@ -66,3 +70,6 @@ app.include_router(loaiTrangPhucRouter)
 app.include_router(trangPhucRouter)
 app.include_router(hoaTietRouter)
 app.include_router(phoiDoRouter)
+app.include_router(yeuThichRouter)
+app.include_router(trangChuRouter)
+app.include_router(trangCaNhanRouter)

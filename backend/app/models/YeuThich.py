@@ -4,7 +4,7 @@ from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.database import Base
-
+from datetime import datetime
 
 class YeuThich(Base):
 
@@ -24,6 +24,7 @@ class YeuThich(Base):
 
     ngayTao = Column(
         DateTime,
+        default=datetime.utcnow,
         nullable=False
     )
 

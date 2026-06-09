@@ -3,7 +3,7 @@ from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import ForeignKey
 from sqlalchemy import Text
-
+from sqlalchemy import Boolean
 from sqlalchemy.orm import relationship
 
 from app.db.database import Base
@@ -61,6 +61,12 @@ class TrangPhuc(Base):
         String(100),
         nullable=True
     )
+
+    trangThai = Column(
+        Boolean,
+        default=True
+    )
+    
     nguoiDung = relationship(
         "NguoiDung",
         back_populates="trangPhucs"

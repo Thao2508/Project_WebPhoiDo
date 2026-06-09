@@ -9,12 +9,14 @@ import {
   Trash2,
   X,
   Pencil,
-  Check
+  Check,
+  Heart
 } from "lucide-react";
 
 import { Link } from "react-router-dom";
 
 import { useState, useEffect} from "react";
+import axios from "axios";
 
 export default function TuDo() {
 
@@ -23,6 +25,8 @@ export default function TuDo() {
   const [selectedItem, setSelectedItem] = useState(null);
 
   const [selectedOutfit, setSelectedOutfit] = useState([]);
+
+  const [selectAll, setSelectAll] = useState(false);
 
   const [isSelecting, setIsSelecting] = useState(false);
 
@@ -67,6 +71,14 @@ export default function TuDo() {
 
   const maNguoiDung = parseInt(localStorage.getItem("maNguoiDung"));
 
+  const [openSaveDialog, setOpenSaveDialog] = useState(false);
+
+  const [selectedSavedOutfit, setSelectedSavedOutfit]= useState(null);
+
+  const [trangThaiOutfit, setTrangThaiOutfit] = useState(0);
+
+  const [likedOutfits, setLikedOutfits] = useState([]);
+
   useEffect(() => {
 
     fetchTrangPhuc();
@@ -83,6 +95,23 @@ export default function TuDo() {
 
   }, []);
 
+
+  useEffect(() => {
+
+    if (
+      filteredData.length > 0
+      &&
+      selectedOutfit.length === filteredData.length
+    ) {
+
+      setSelectAll(true);
+
+    } else {
+
+      setSelectAll(false);
+    }
+
+  }, [selectedOutfit, filteredData]);
 
   const fetchTrangPhuc = async () => {
 
@@ -209,6 +238,21 @@ export default function TuDo() {
     ]);
   };
 
+  const handleSelectAll = () => {
+
+    if (selectAll) {
+
+      setSelectedOutfit([]);
+
+      setSelectAll(false);
+
+    } else {
+
+      setSelectedOutfit(filteredData);
+
+      setSelectAll(true);
+    }
+  };
 
   const handleOpenUpdate = async (
     item,
@@ -249,28 +293,81 @@ export default function TuDo() {
     }
   };
 
-
-
   const handleSearch = (
-
     keyword,
-
     category
   ) => {
 
     let data = [...trangPhuc];
 
-    if (keyword !== "") {
+    const searchValue = keyword
+      .toLowerCase()
+      .trim();
 
-      data = data.filter((item) =>
+    if (searchValue !== "") {
 
-        item.tenTrangPhuc
-          .toLowerCase()
+      data = data.filter((item) => {
 
-          .includes(
-            keyword.toLowerCase()
+        const tenTrangPhuc =
+
+          item?.tenTrangPhuc
+            ?.toLowerCase() || "";
+
+        const kieuDang =
+
+          item?.kieuDang
+            ?.toLowerCase() || "";
+
+        const tenLoai =
+
+          item?.loai
+            ?.tenLoai
+            ?.toLowerCase() || "";
+
+        const tenDanhMuc =
+
+          item?.loai
+            ?.danhMuc
+            ?.tenDanhMuc
+            ?.toLowerCase() || "";
+
+        const tenMau =
+
+          item?.mau
+            ?.tenMau
+            ?.toLowerCase() || "";
+
+        return (
+
+          tenTrangPhuc.includes(
+            searchValue
           )
-      );
+
+          ||
+
+          kieuDang.includes(
+            searchValue
+          )
+
+          ||
+
+          tenLoai.includes(
+            searchValue
+          )
+
+          ||
+
+          tenDanhMuc.includes(
+            searchValue
+          )
+
+          ||
+
+          tenMau.includes(
+            searchValue
+          )
+        );
+      });
     }
     if (category !== "Tất cả") {
 
@@ -278,12 +375,14 @@ export default function TuDo() {
 
         (item) =>
 
-          item.tenDanhMuc === category
+          item?.loai
+            ?.danhMuc
+            ?.tenDanhMuc === category
       );
     }
+
     setFilteredData(data);
   };
-
 
   const handleUpdateTrangPhuc = async () => {
 
@@ -469,9 +568,6 @@ export default function TuDo() {
         data.message || ""
       );
 
-      setSelectedPhongCach("");
-      setSelectedDip("");
-
     } catch (error) {
 
       console.log(error);
@@ -483,6 +579,138 @@ export default function TuDo() {
     }
   };
 
+  const getOutfitKey = (outfit) => {
+
+    return [
+      outfit?.ao?.maTrangPhuc,
+      outfit?.quan?.maTrangPhuc
+    ]
+      .filter(Boolean)
+      .join("-");
+  };
+
+  const isLiked = (outfit) => {
+
+    return likedOutfits.some(
+
+      (item) =>
+
+        getOutfitKey(item)
+        === getOutfitKey(outfit)
+    );
+  };
+
+  const handleHeartClick = async (outfit) => {
+    // unlike
+    if (isLiked(outfit)) {
+
+      try {
+
+        await axios.delete(
+          "http://localhost:8000/yeu-thich/xoa",
+          {
+            data: {
+              maNguoiDung,
+              outfit
+            }
+          }
+        );
+
+        setLikedOutfits((prev) =>
+          prev.filter(
+            (item) =>
+              getOutfitKey(item)
+              !== getOutfitKey(outfit)
+          )
+        );
+
+      } catch (err) {
+
+        console.log(err);
+      }
+
+      return;
+    }
+
+    // chưa like
+    setSelectedSavedOutfit(outfit);
+
+    setOpenSaveDialog(true);
+  };
+
+
+  const handleSaveOutfit = async () => {
+
+    if (!selectedSavedOutfit) {
+
+      return;
+    }
+
+    try {
+
+      const maNguoiDung =
+        parseInt(
+          localStorage.getItem(
+            "maNguoiDung"
+          )
+        );
+
+      const response = await axios.post(
+
+        "http://localhost:8000/yeu-thich/tao",
+
+        {
+
+          maNguoiDung,
+
+          trangThai:
+            trangThaiOutfit,
+
+          maLuat:
+            selectedSavedOutfit
+              ?.maLuat || null,
+
+          maLuatMau:
+            selectedSavedOutfit
+              ?.maLuatMau || null,
+
+          outfit:
+            selectedSavedOutfit
+        }
+      );
+
+      console.log(response.data);
+
+      if (!response.data.success) {
+
+        alert(
+          response.data.message ||
+          "Không thể lưu outfit"
+        );
+
+        return;
+      }
+
+      setLikedOutfits((prev) => [
+
+        ...prev,
+
+        selectedSavedOutfit
+      ]);
+
+      setOpenSaveDialog(false);
+
+      setSelectedSavedOutfit(null);
+
+      setTrangThaiOutfit(0);
+
+    } catch (err) {
+
+      console.log(err);
+
+      alert("Lỗi lưu outfit");
+    }
+  };
 
   return (
 
@@ -627,415 +855,250 @@ export default function TuDo() {
           }
 
         </div>
-      
-        {/* GRID */}
-        <div
-          className={
-            openSuggestDrawer
-              ? "closet-layout"
-              : "closet-full"
-          }
-        >
-
-        <div className="closet-left">
-
-        <div className="td-grid">
-
         {
-        filteredData.length === 0 ? (
+        isSelecting && (
 
-          <div className="empty-closet">
+          <div className="select-all-wrapper">
 
-            <h2>
-              Tủ đồ của bạn đang trống
-            </h2>
+            <label className="select-all-label">
 
-            <p>
-              Hãy thêm trang phục để bắt đầu phối đồ
-            </p>
+              <input
+
+                type="checkbox"
+
+                checked={selectAll}
+
+                onChange={handleSelectAll}
+              />
+
+              <span>
+                Chọn tất cả 
+              </span>
+
+            </label>
 
           </div>
+        )
+      }
+        
+        {/* GRID */}
+        {/* GRID & LAYOUT CHÍNH */}
+        <div className={openSuggestDrawer ? "closet-layout" : "closet-full"}>
+          
+          {/* BÊN TRÁI: DANH SÁCH TỦ ĐỒ */}
+          <div className="closet-left">
+            {filteredData.length === 0 ? (
+              /* ĐƯA RA NGOÀI ĐỂ KHÔNG BỊ CSS CỦA GRID ÉP KÍCH THƯỚC */
+              <div className="empty-closet">
+                <h2>Tủ đồ của bạn đang trống</h2>
+                <p>Hãy thêm trang phục để bắt đầu phối đồ</p>
+              </div>
+            ) : (
+              <div className="td-grid">
+                {filteredData.map((item) => {
+                  const isSelected = selectedOutfit.some(
+                    (i) => i.maTrangPhuc === item.maTrangPhuc
+                  );
 
-        ) : (
-
-      filteredData.map((item) => {
-
-              const isSelected = selectedOutfit.some(
-                (i) => i.maTrangPhuc === item.maTrangPhuc
-              );
-
-              return (
-
-                <div
-                  className={
-                    isSelected
-
-                    ? "td-card selected"
-
-                    : "td-card"
-                  }
-
-                  key={item.maTrangPhuc}
-                  onClick={async () => {
-                  if (isSelecting) {
-
-                    handleSelectItem(item);
-
-                    return;
-                  }
-
-                  try {
-
-                    const response = await fetch(
-
-                      `http://localhost:8000/trang-phuc/${item.maTrangPhuc}`
-                    );
-
-                    const data = await response.json();
-
-                    setSelectedItem(data);
-
-                    setFormData({
-
-                      tenTrangPhuc: data.tenTrangPhuc,
-
-                      maLoai: data.maLoai,
-
-                      maMau: data.maMau
-                    });
-
-                    setOpenDialog(true);
-
-                  } catch (error) {
-
-                    console.log(error);
-                  }
-                }}>
-
-                  {/* SELECTED */}
-
-                  {
-                    isSelecting && isSelected && (
-                      <div className="selected-check">
-
-                        <Check size={16} />
-
-                      </div>
-                    )
-                  }
-
-                  {/* IMAGE */}
-
-                  <img
-                    src={item.hinhAnh}
-                    alt=""
-                  />
-
-                  {/* ACTION */}
-
-                  <div className="td-action-group">
-
-                    <button
-                      className="td-update"
-
-                      onClick={(e) =>
-                        handleOpenUpdate(item, e)
-                      }
-                    >
-
-                      <Pencil size={15} />
-
-                    </button>
-
-                    <button
-                      className="td-delete"
-
-                      onClick={async (e) => {
-
-                        e.stopPropagation();
-
+                  return (
+                    <div
+                      className={isSelected ? "td-card selected" : "td-card"}
+                      key={item.maTrangPhuc}
+                      onClick={async () => {
+                        if (isSelecting) {
+                          handleSelectItem(item);
+                          return;
+                        }
                         try {
-
-                          const response = await fetch(
-
-                            `http://localhost:8000/trang-phuc/${item.maTrangPhuc}`,
-
-                            {
-                              method: "DELETE"
-                            }
-                          );
-
+                          const response = await fetch(`http://localhost:8000/trang-phuc/${item.maTrangPhuc}`);
                           const data = await response.json();
-
-                          alert(data.message);
-
-                          fetchTrangPhuc();
-
+                          setSelectedItem(data);
+                          setFormData({
+                            tenTrangPhuc: data.tenTrangPhuc,
+                            maLoai: data.maLoai,
+                            maMau: data.maMau
+                          });
+                          setOpenDialog(true);
                         } catch (error) {
-
                           console.log(error);
                         }
                       }}
                     >
+                      {isSelecting && isSelected && (
+                        <div className="selected-check">
+                          <Check size={16} />
+                        </div>
+                      )}
 
-                      <Trash2 size={15} />
+                      <img src={item.hinhAnh} alt="" />
 
-                    </button>
+                      <div className="td-action-group">
+                        <button className="td-update" onClick={(e) => handleOpenUpdate(item, e)}>
+                          <Pencil size={15} />
+                        </button>
+                        <button
+                          className="td-delete"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            try {
+                              const response = await fetch(`http://localhost:8000/trang-phuc/${item.maTrangPhuc}`, {
+                                method: "DELETE"
+                              });
+                              const data = await response.json();
+                              alert(data.message);
+                              fetchTrangPhuc();
+                            } catch (error) {
+                              console.log(error);
+                            }
+                          }}
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
 
-                  </div>
+                      <div className="td-info">
+                        <h3>{item.tenTrangPhuc}</h3>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
-                  {/* INFO */}
-
-                  <div className="td-info">
-
-                    <h3>
-                      {item.tenTrangPhuc}
-                    </h3>
-                  </div>
-
-                </div>
-              );
-            }))
-          }
-
-        </div>
-        </div>
-
-
-        {
-        openSuggestDrawer && (
-
-          <div className="closet-right">
-
-          <div className="goiy-section suggest-panel">
-
-            <div className="suggest-header">
-
-              <h2>
-                Gợi ý phối đồ
-              </h2>
-
-              <button
-                className="close-suggest"
-                onClick={handleCloseSuggest}
-              >
-                <X size={18} />
-              </button>
-
-            </div>
-
-            {/* FORM */}
-
-            <div className="suggest-form">
-
-              <select
-                value={selectedPhongCach}
-                onChange={(e) =>
-                  setSelectedPhongCach(
-                    e.target.value
-                  )
-                }
-              >
-
-                <option value="">
-                  Chọn phong cách
-                </option>
-
-                {
-                  phongCach.map((item) => (
-
-                    <option
-                      key={item.maPhongCach}
-                      value={item.maPhongCach}
-                    >
-
-                      {item.tenPhongCach}
-
-                    </option>
-                  ))
-                }
-
-              </select>
-
-              <select
-                value={selectedDip}
-                onChange={(e) =>
-                  setSelectedDip(
-                    e.target.value
-                  )
-                }
-              >
-
-                <option value="">
-                  Chọn dịp sử dụng
-                </option>
-
-                {
-                  dipSuDung.map((item) => (
-
-                    <option
-                      key={item.maDipSD}
-                      value={item.maDipSD}
-                    >
-
-                      {item.tenDipSD}
-
-                    </option>
-                  ))
-                }
-
-              </select>
-
-            </div>
-
-            <button
-              className="suggest-btn"
-              onClick={handlePhoiDo}
-              disabled={loadingPhoiDo}
-            >
-
-              <Shirt size={18} />
-
-              <span>
-
-                {
-                  loadingPhoiDo
-                    ? "Đang phối..."
-                    : "Phối đồ ngay"
-                }
-
-              </span>
-
-            </button>
-
-            {
-              goiYMessage && (
-
-                <p className="fallback-message">
-                  {goiYMessage}
-                </p>
-              )
-            }
-            <div className="suggest-result">
-          
-          {
-          goiYOutfits.map((group, groupIndex) => {
-
-            if (
-              !group ||
-              !group.outfits ||
-              group.outfits.length === 0
-            ) {
-              return null;
-            }
-
-            return (
-
-              <div
-                key={groupIndex}
-                className="fallback-group"
-              >
-
-                {/* CONTEXT */}
-
-                <div className="fallback-context">
-
-                  <h3>
-
-                    {group?.context?.tenPhongCach || "Outfit"}
-
-                    {
-                      group?.context?.tenDipSuDung
-                        ? ` - ${group.context.tenDipSuDung}`
-                        : ""
-                    }
-
-                  </h3>
-
+          {/* BÊN PHẢI: DRAWER GỢI Ý (Chỉ hiển thị khi openSuggestDrawer === true) */}
+          {openSuggestDrawer && (
+            <div className="closet-right">
+              <div className="goiy-section suggest-panel">
+                <div className="suggest-header">
+                  <h2>Gợi ý phối đồ</h2>
+                  <button className="close-suggest" onClick={handleCloseSuggest}>
+                    <X size={18} />
+                  </button>
                 </div>
 
-                {/* GRID */}
+                <div className="suggest-form">
+                  <select
+                    value={selectedPhongCach}
+                    onChange={(e) => setSelectedPhongCach(e.target.value)}
+                  >
+                    <option value="">Chọn phong cách</option>
+                    {phongCach.map((item) => (
+                      <option key={item.maPhongCach} value={item.maPhongCach}>
+                        {item.tenPhongCach}
+                      </option>
+                    ))}
+                  </select>
 
-                <div className="goiy-grid">
+                  <select
+                    value={selectedDip}
+                    onChange={(e) => setSelectedDip(e.target.value)}
+                  >
+                    <option value="">Chọn dịp sử dụng</option>
+                    {dipSuDung.map((item) => (
+                      <option key={item.maDipSD} value={item.maDipSD}>
+                        {item.tenDipSD}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                  {
-                    group.outfits.map((outfit, index) => (
+                <button className="suggest-btn" onClick={handlePhoiDo} disabled={loadingPhoiDo}>
+                  <Shirt size={18} />
+                  <span>{loadingPhoiDo ? "Đang phối..." : "Phối đồ ngay"}</span>
+                </button>
 
-                      <div
-                        className="goiy-card"
-                        key={`${groupIndex}-${index}`}
-                      >
+                {goiYMessage && <p className="fallback-message">{goiYMessage}</p>}
 
-                        <div className="goiy-items">
+                <div className="suggest-result">
+                  {goiYOutfits.map((group, groupIndex) => {
+                    if (!group || !group.outfits || group.outfits.length === 0) return null;
+                    return (
+                      <div key={groupIndex} className="fallback-group">
+                        <div className="fallback-context">
+                          <h3>
+                            {group?.context?.tenPhongCach || "Outfit"}
+                            {group?.context?.tenDipSuDung ? ` - ${group.context.tenDipSuDung}` : ""}
+                          </h3>
+                        </div>
 
-                          {/* ÁO */}
+                        <div className="goiy-grid">
+                          {group.outfits.map((outfit, index) => (
+                            <div className="goiy-card" key={`${groupIndex}-${index}`}>
+                              <button
+                                className="heart-btn"
 
-                          {
-                            outfit?.ao && (
+                                onClick={(e) => {
 
-                              <div className="goiy-item">
+                                  e.stopPropagation();
 
-                                {
-                                  outfit?.ao?.hinhAnh && (
+                                  handleHeartClick(outfit);
+                                }}
+                              >
+
+                                <Heart
+
+                                  size={22}
+
+                                  fill={
+                                    isLiked(outfit)
+                                      ? "#ff4d6d"
+                                      : "white"
+                                  }
+
+                                  color={
+                                    isLiked(outfit)
+                                      ? "#ff4d6d"
+                                      : "#94a3b8"
+                                  }
+                                />
+
+                              </button>
+                              <div className="goiy-items">
+
+                                {outfit?.ao?.hinhAnh && (
+
+                                  <div className="goiy-item">
 
                                     <img
                                       src={outfit.ao.hinhAnh}
                                       alt=""
                                     />
-                                  )
-                                }
 
-                                <p>
-                                  {outfit?.ao?.tenTrangPhuc || ""}
-                                </p>
+                                    <p>
+                                      {outfit.ao.tenTrangPhuc}
+                                    </p>
 
-                              </div>
-                            )
-                          }
+                                  </div>
+                                )}
 
-                          {/* QUẦN */}
+                                {outfit?.quan?.hinhAnh && (
 
-                          {
-                            outfit?.quan && (
-
-                              <div className="goiy-item">
-
-                                {
-                                  outfit?.quan?.hinhAnh && (
+                                  <div className="goiy-item">
 
                                     <img
                                       src={outfit.quan.hinhAnh}
                                       alt=""
                                     />
-                                  )
-                                }
 
-                                <p>
-                                  {outfit?.quan?.tenTrangPhuc || ""}
-                                </p>
+                                    <p>
+                                      {outfit.quan.tenTrangPhuc}
+                                    </p>
+
+                                  </div>
+                                )}
 
                               </div>
-                            )
-                          }
-
+                            </div>
+                          ))}
                         </div>
-
                       </div>
-                    ))
-                  }
-
+                    );
+                  })}
                 </div>
-                
               </div>
-            );
-          })
-        }
-          </div>
-        </div>
-        </div>
-        )
-        }
-
+            </div>
+          )}
         </div>
       </div>
 
@@ -1210,6 +1273,90 @@ export default function TuDo() {
           </div>
         )
       }
+
+      {
+      openSaveDialog && (
+
+        <div className="save-dialog-overlay">
+
+          <div className="save-dialog">
+
+            <h3>
+              Chọn trạng thái hiển thị
+            </h3>
+
+            <div className="visibility-options">
+
+              <label>
+
+                <input
+                  type="radio"
+                  name="visibility"
+
+                  checked={
+                    trangThaiOutfit === 1
+                  }
+
+                  onChange={() =>
+                    setTrangThaiOutfit(1)
+                  }
+                />
+
+                Công khai
+
+              </label>
+
+              <label>
+
+                <input
+                  type="radio"
+                  name="visibility"
+
+                  checked={
+                    trangThaiOutfit === 0
+                  }
+
+                  onChange={() =>
+                    setTrangThaiOutfit(0)
+                  }
+                />
+
+                Riêng tư
+
+              </label>
+
+            </div>
+
+            <div className="dialog-actions">
+
+              <button
+                onClick={() =>
+                  setOpenSaveDialog(false)
+                }
+              >
+                Hủy
+              </button>
+
+              <button
+                type="button"
+
+                onClick={(e) => {
+
+                  e.stopPropagation();
+
+                  handleSaveOutfit();
+                }}
+              >
+                Lưu outfit
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )
+    }
 
     </div>
   );

@@ -41,6 +41,9 @@ def get_all_loai(
             "maDanhMuc":
             item.maDanhMuc,
 
+            "tuKhoaNhanDien":
+            item.tuKhoaNhanDien,
+
             "tenDanhMuc":
             danhMuc.tenDanhMuc
             if danhMuc else "",
@@ -83,8 +86,11 @@ def them_loai(
         data.tenLoai,
 
         maDanhMuc=
-        data.maDanhMuc
-    )
+        data.maDanhMuc,
+
+        tuKhoaNhanDien=
+        data.tuKhoaNhanDien
+        )
 
     db.add(loai)
 
@@ -153,6 +159,10 @@ def cap_nhat_loai(
 
     loai.maDanhMuc = (
         data.maDanhMuc
+    )
+
+    loai.tuKhoaNhanDien = (
+        data.tuKhoaNhanDien
     )
 
     db.commit()

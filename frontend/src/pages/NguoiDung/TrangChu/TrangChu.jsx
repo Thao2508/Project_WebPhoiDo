@@ -1,5 +1,3 @@
-// TrangChu.jsx
-
 import "./TrangChu.scss";
 
 import Sidebar from "../../../components/SideBar/SideBar";
@@ -7,6 +5,7 @@ import Sidebar from "../../../components/SideBar/SideBar";
 import {
   Bell,
   Search,
+  User,
   Sparkles,
   Upload,
   Heart,
@@ -19,6 +18,14 @@ import {
   useNavigate
 } from "react-router-dom";
 
+import {
+  useEffect,
+  useState
+} from "react";
+
+import axios from "axios";
+
+
 export default function TrangChu() {
 
   const navigate = useNavigate();
@@ -30,53 +37,123 @@ export default function TrangChu() {
 
   const isLogin = !!user;
 
-  // OUTFIT DATA
-  const outfits = [
+  // STATE
+  const [outfits, setOutfits] = useState([]);
+  const [keyword, setKeyword] = useState("");
 
-    {
-      ao: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=600&auto=format&fit=crop",
+  const [thongKe, setThongKe] = useState({
 
-      quan:
-        "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=600&auto=format&fit=crop",
+    tongTrangPhuc: 0,
+    tongOutfitYeuThich: 0
+  });
 
-      style: "Casual",
+  // API
+  useEffect(() => {
 
-      occasion: "Đi học"
-    },
+    layOutfit();
 
-    {
-      ao: "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=600&auto=format&fit=crop",
+    if (user) {
 
-      quan:
-        "https://images.unsplash.com/photo-1506629905607-d9c297d4d42c?q=80&w=600&auto=format&fit=crop",
-
-      style: "Minimal",
-
-      occasion: "Đi làm"
-    },
-
-    {
-      ao: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?q=80&w=600&auto=format&fit=crop",
-
-      quan:
-        "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?q=80&w=600&auto=format&fit=crop",
-
-      style: "Korean",
-
-      occasion: "Đi chơi"
-    },
-
-    {
-      ao: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop",
-
-      quan:
-        "https://images.unsplash.com/photo-1506629905607-d9c297d4d42c?q=80&w=600&auto=format&fit=crop",
-
-      style: "Streetwear",
-
-      occasion: "Dạo phố"
+      layThongKe();
     }
-  ];
+
+  }, []);
+
+
+  const layOutfit = async (
+    search = ""
+  ) => {
+
+    try {
+
+      const res = await axios.get(
+
+        "http://localhost:8000/trang-chu/goi-y-outfit",
+
+        {
+          params: {
+
+            keyword: search,
+
+            maNguoiDung:
+              user?.maNguoiDung
+          }
+        }
+      );
+
+      setOutfits(res.data);
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+
+
+  const layThongKe = async () => {
+
+    try {
+
+      const res = await axios.get(
+
+        `http://localhost:8000/trang-chu/thong-ke/${user.maNguoiDung}`
+      );
+
+      setThongKe(res.data);
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
+
+  const handleSearch = (
+    e
+  ) => {
+
+    const value = e.target.value;
+
+    setKeyword(value);
+
+    layOutfit(value);
+  };
+
+  const handleYeuThich = async (
+    maBoPhoi
+  ) => {
+
+    if (!isLogin) {
+
+      requireLogin();
+
+      return;
+    }
+
+    try {
+
+      await axios.post(
+
+        `http://localhost:8000/trang-chu/yeu-thich/${maBoPhoi}`,
+
+        null,
+
+        {
+          params: {
+
+            maNguoiDung:
+              user.maNguoiDung
+          }
+        }
+      );
+
+      layOutfit(keyword);
+
+    } catch (error) {
+
+      console.log(error);
+    }
+  };
 
   // LOGIN REQUIRED
   const requireLogin = () => {
@@ -113,12 +190,12 @@ export default function TrangChu() {
           <div className="search-box">
 
             <Search size={18} />
-
             <input
               type="text"
-              placeholder="Tìm kiếm trang phục, phong cách, dịp sử dụng..."
+              placeholder="Tìm kiếm outfit, phong cách, dịp sử dụng..."
+              value={keyword}
+              onChange={handleSearch}
             />
-
           </div>
 
           {/* RIGHT */}
@@ -129,12 +206,15 @@ export default function TrangChu() {
               <>
                 <Bell size={20} />
 
-                <div className="profile">
-
-                  <img
-                    src="https://i.pravatar.cc/150?img=32"
-                    alt=""
-                  />
+                <div
+                  className="profile"
+                  onClick={() =>
+                    navigate("/trangcanhan")
+                  }
+                >
+                  <div className="profile-icon">
+                    <User size={20} />
+                  </div>
 
                   <span>
                     {user?.tenDangNhap}
@@ -182,6 +262,7 @@ export default function TrangChu() {
             <div className="hero">
 
               <div className="hero-left">
+
                 <h1>
                   Phối đồ theo
                   <br />
@@ -230,68 +311,6 @@ export default function TrangChu() {
 
             </div>
 
-            {/* STYLE SECTION */}
-            <div className="style-section">
-
-              <div className="section-header">
-
-                <h2>Khám phá phong cách</h2>
-
-                <span>
-
-                  Xem tất cả
-
-                  <ArrowRight size={16} />
-
-                </span>
-
-              </div>
-
-              <div className="styles">
-
-                <div className="style-card">
-
-                  <img
-                    src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1000&auto=format&fit=crop"
-                    alt=""
-                  />
-
-                  <div className="style-overlay">
-                    Casual
-                  </div>
-
-                </div>
-
-                <div className="style-card">
-
-                  <img
-                    src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop"
-                    alt=""
-                  />
-
-                  <div className="style-overlay">
-                    Korean
-                  </div>
-
-                </div>
-
-                <div className="style-card">
-
-                  <img
-                    src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=1000&auto=format&fit=crop"
-                    alt=""
-                  />
-
-                  <div className="style-overlay">
-                    Minimal
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
           </>
         )}
 
@@ -320,7 +339,11 @@ export default function TrangChu() {
               {/* ACTIONS */}
               <div className="actions">
 
-                <div className="action-card">
+                <div className="action-card"
+                  onClick={() =>
+                    navigate("/phoido")
+                  }
+                >
 
                   <div className="icon purple">
 
@@ -340,7 +363,11 @@ export default function TrangChu() {
 
                 </div>
 
-                <div className="action-card">
+                <div className="action-card"
+                  onClick={() =>
+                    navigate("/themtrangphuc")
+                  }
+                >
 
                   <div className="icon orange">
 
@@ -375,7 +402,9 @@ export default function TrangChu() {
 
                   <div>
 
-                    <h3>36</h3>
+                    <h3>
+                      {thongKe.tongTrangPhuc}
+                    </h3>
 
                     <p>Tủ đồ của bạn</p>
 
@@ -393,7 +422,9 @@ export default function TrangChu() {
 
                   <div>
 
-                    <h3>12</h3>
+                    <h3>
+                      {thongKe.tongOutfitYeuThich}
+                    </h3>
 
                     <p>Outfit đã lưu</p>
 
@@ -411,7 +442,7 @@ export default function TrangChu() {
         {/* SECTION */}
         <div className="section-header">
 
-          <h2>Gợi ý outfit dành cho bạn</h2>
+          <h2>Bộ phối gợi ý dành cho bạn</h2>
 
           <span>
 
@@ -425,62 +456,105 @@ export default function TrangChu() {
 
         {/* OUTFITS */}
         <div className="outfits">
+        {
+          outfits.length > 0 ? (
 
-          {outfits.map((item, index) => (
+            outfits.map((item, index) => (
 
-            <div
-              className="outfit-card"
-              key={index}
-            >
-
-              <button
-                className="heart"
-                onClick={!isLogin ? requireLogin : null}
+              <div
+                className="outfit-card"
+                key={index}
               >
 
-                <Heart size={18} />
+                <button
+                  className={`heart ${
+                    item.daYeuThich
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() =>
+                    handleYeuThich(
+                      item.maBoPhoi
+                    )
+                  }
+                >
 
-              </button>
+                  <Heart
+                    size={18}
+                    fill={
+                      item.daYeuThich
+                        ? "#ff4d6d"
+                        : "white"
+                    }
+                  />
 
-              <img
-                src={item.ao}
-                alt=""
-                className="cloth"
-              />
+                </button>
 
-              <img
-                src={item.quan}
-                alt=""
-                className="cloth"
-              />
+                <div className="outfit-vertical">
+                  {
+                    item.trangPhucs.map((tp) => (
 
-              <div className="outfit-info">
+                      <div
+                        className="cloth-item"
+                        key={tp.maTrangPhuc}
+                      >
 
-                <div className="tags">
+                        <img
+                          src={tp.hinhAnh}
+                          alt=""
+                          className="cloth"
+                        />
 
-                  <span className="style">
-                    {item.style}
-                  </span>
+                      </div>
 
-                  <span className="occasion">
-                    {item.occasion}
-                  </span>
+                    ))
+                  }
 
                 </div>
 
-                <p className="outfit-desc">
+                <div className="outfit-info">
 
-                  Outfit phù hợp cho phong cách{" "}
-                  {item.style.toLowerCase()}
+                  <div className="tags">
 
-                </p>
+                    <span className="style">
+                      {item.phongCach}
+                    </span>
+
+                    <span className="occasion">
+                      {item.dipSuDung}
+                    </span>
+
+                  </div>
+
+                  <p className="outfit-desc">
+
+                    Outfit phù hợp cho phong cách{" "}
+                    {item.phongCach?.toLowerCase()}
+
+                  </p>
+
+                </div>
 
               </div>
+            ))
+
+          ) : (
+
+            <div className="empty-outfit">
+
+              <h3>
+                Không tìm thấy outfit nào
+              </h3>
+
+              <p>
+                Hãy thử tìm kiếm với từ khóa khác
+              </p>
 
             </div>
-          ))}
+          )
+        }
 
-        </div>
+      </div>
 
         {/* CTA */}
         {!isLogin && (
@@ -514,4 +588,3 @@ export default function TrangChu() {
     </div>
   );
 }
-//zdfdg

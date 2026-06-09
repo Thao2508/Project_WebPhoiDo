@@ -3,9 +3,9 @@ from fastapi import Depends
 
 from sqlalchemy.orm import Session
 
-from app.schemas.auth_schema import DangNhapRequest
+from app.schemas.auth_schema import (DangNhapRequest, DangKyRequest)
 
-from app.services.auth_service import dang_nhap_service
+from app.services.auth_service import (dang_nhap_service, dang_ky_service)
 
 from app.db.database import SessionLocal
 
@@ -68,5 +68,38 @@ def dang_nhap(
 
             "vaiTro":
             user.vaiTro
+        }
+    }
+
+@router.post("/dangky")
+
+def dang_ky(
+    request: DangKyRequest,
+    db: Session = Depends(get_db)
+):
+
+    user = dang_ky_service(
+        db,
+        request.tenDangNhap,
+        request.email,
+        request.matKhau,
+        request.gioiTinh,
+        request.ngaySinh
+    )
+
+    if not user:
+
+        return {
+            "success": False,
+            "message": "Email đã tồn tại"
+        }
+
+    return {
+        "success": True,
+        "message": "Đăng ký thành công",
+        "user": {
+            "maNguoiDung": user.maNguoiDung,
+            "tenDangNhap": user.tenDangNhap,
+            "email": user.email
         }
     }

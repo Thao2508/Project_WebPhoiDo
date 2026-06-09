@@ -6,75 +6,76 @@ import {
   Search,
 } from "lucide-react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function YeuThich() {
 
-  const [favorites, setFavorites] = useState([
+  const [favorites, setFavorites] =
+  useState([]);
 
-    {
-      id: 1,
+  const handleRemoveFavorite = async (outfit) => {
 
-      ten: "đi dạo",
+    try {
 
-      phongcach: "Casual",
-      ao:
-        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1000&auto=format&fit=crop",
+      const maNguoiDung =
+        localStorage.getItem(
+          "maNguoiDung"
+        );
 
-      quan:
-        "https://images.unsplash.com/photo-1506629905607-d9c297d4d42c?q=80&w=1000&auto=format&fit=crop"
-    },
+      await axios.delete(
 
-    {
-      id: 2,
+        "http://localhost:8000/yeu-thich/xoa",
 
-      ten: "bộ đi chơi",
+        {
 
-      phongcach: "Streetwear",
-      ao:
-        "https://images.unsplash.com/photo-1503341504253-dff4815485f1?q=80&w=1000&auto=format&fit=crop",
+          data: {
 
-      quan:
-        "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=1000&auto=format&fit=crop"
-    },
+            maNguoiDung,
 
-    {
-      id: 3,
+            outfit:
+              outfit.outfit
+          }
+        }
+      );
 
-      ten: "bộ phối đi làm",
+      fetchFavorites();
 
-      phongcach: "Minimal",
+    } catch (err) {
 
-      ao:
-        "https://images.unsplash.com/photo-1603252109303-2751441dd157?q=80&w=1000&auto=format&fit=crop",
-
-      quan:
-        "https://images.unsplash.com/photo-1582552938357-32b906df40cb?q=80&w=1000&auto=format&fit=crop"
-    },
-    {
-      id: 4,
-
-      ten: "bộ đi chơi",
-
-      phongcach: "Streetwear",
-
-      ao:
-        "https://images.unsplash.com/photo-1503341504253-dff4815485f1?q=80&w=1000&auto=format&fit=crop",
-
-      quan:
-        "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=1000&auto=format&fit=crop"
+      console.log(err);
     }
-
-  ]);
-
-
-  const handleRemoveFavorite = (id) => {
-
-    setFavorites(
-      favorites.filter((item) => item.id !== id)
-    );
-
   };
+
+  const fetchFavorites = async () => {
+
+    try {
+
+      const maNguoiDung =
+        localStorage.getItem(
+          "maNguoiDung"
+        );
+
+      const res = await axios.get(
+
+        `http://localhost:8000/yeu-thich/user/${maNguoiDung}`
+      );
+
+      setFavorites(
+        res.data || []
+      );
+
+    } catch (err) {
+
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+
+    fetchFavorites();
+
+  }, []);
 
   return (
 
@@ -114,87 +115,92 @@ export default function YeuThich() {
         </div>
 
         {/* GRID */}
-
         <div className="yt-grid">
 
-          {
-            favorites.map((item) => (
+          {favorites.map((item) => (
 
-              <div
-                className="yt-card"
-                key={item.id}
+            <div
+              className="yt-card"
+              key={item.maBoPhoi}
+            >
+
+              {/* HEART */}
+
+              <button
+                className="yt-heart active"
+                onClick={() =>
+                  handleRemoveFavorite(item)
+                }
               >
 
-                {/* HEART */}
+                <Heart
+                  size={18}
+                  fill="currentColor"
+                />
 
-                <button
-                  className="yt-heart active"
-                  onClick={() =>
-                    handleRemoveFavorite(item.id)
-                  }
-                >
+              </button>
 
-                  <Heart
-                    size={18}
-                    fill="currentColor"
-                  />
+              {/* OUTFIT */}
 
-                </button>
+              <div className="yt-outfit-vertical">
 
-                {/* OUTFIT */}
+                {/* ÁO */}
 
-                <div className="yt-outfit-vertical">
-
-                  {/* ÁO */}
+                {item?.outfit?.ao && (
 
                   <div className="yt-cloth">
 
                     <img
-                      src={item.ao}
+                      src={
+                        item.outfit.ao.hinhAnh
+                      }
                       alt=""
                     />
-
-                    <span>Áo</span>
-
                   </div>
+                )}
 
-                  {/* QUẦN */}
+                {/* QUẦN */}
+
+                {item?.outfit?.quan && (
 
                   <div className="yt-cloth">
 
                     <img
-                      src={item.quan}
+                      src={
+                        item.outfit.quan.hinhAnh
+                      }
                       alt=""
                     />
-
-                    <span>Quần</span>
-
                   </div>
-
-                </div>
-
-                {/* INFO */}
-
-                <div className="yt-info">
-
-                  <span className="yt-tag">
-
-                    {item.phongcach}
-
-                  </span>
-
-                  <h3>{item.ten}</h3>
-
-                  <p>{item.mota}</p>
-
-                </div>
+                )}
 
               </div>
 
-            ))
-          }
+              {/* INFO */}
+
+              <div className="yt-info">
+
+                <span className="yt-tag">
+
+                  {
+                  item.tenPhongCach
+                  }
+
+                  {" • "}
+
+                  {
+                  item.tenDipSuDung
+                  }
+
+                </span>
+
+              </div>
+
+            </div>
+          ))}
 
         </div>
+
 
         {/* EMPTY */}
 

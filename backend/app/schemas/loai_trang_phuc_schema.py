@@ -7,6 +7,8 @@ class LoaiTrangPhucCreate(BaseModel):
 
     maDanhMuc: int
 
+    tuKhoaNhanDien: str
+
 
 class LoaiTrangPhucResponse(BaseModel):
 
@@ -15,6 +17,8 @@ class LoaiTrangPhucResponse(BaseModel):
     tenLoai: str
 
     maDanhMuc: int
+
+    tuKhoaNhanDien: str
 
     class Config:
 

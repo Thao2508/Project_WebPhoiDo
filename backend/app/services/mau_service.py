@@ -15,8 +15,10 @@ def them_mau(
     data
 ):
 
+    ma_hex = data.maMauHex.strip().upper()
+
     check = db.query(Mau).filter(
-        Mau.tenMau == data.tenMau
+        Mau.maMauHex == ma_hex
     ).first()
 
     if check:
@@ -26,14 +28,14 @@ def them_mau(
             "success": False,
 
             "message":
-            "Màu đã tồn tại"
+            "Mã màu HEX đã tồn tại"
         }
 
     mau = Mau(
 
         tenMau=data.tenMau,
 
-        maMauHex=data.maMauHex
+        maMauHex=ma_hex
     )
 
     db.add(mau)

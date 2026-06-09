@@ -1,8 +1,5 @@
 from sqlalchemy.orm import Session
 
-from sqlalchemy import and_
-from sqlalchemy import or_
-
 from app.models.LuatPhoiLoaiDo import (
     LuatPhoiLoaiDo
 )
@@ -212,50 +209,78 @@ def cap_nhat_luat(
             "Không tìm thấy luật"
         }
 
-    # CHECK TRÙNG
+    # CHỈ CHECK TRÙNG
+    # KHI THAY ĐỔI RULE
 
-    checkLuat = db.query(
-        LuatPhoiLoaiDo
-    ).filter(
+    if (
 
-        LuatPhoiLoaiDo.maLoai_1
-        == data.maLoai_1,
+        luat.maLoai_1 != data.maLoai_1
 
-        LuatPhoiLoaiDo.maLoai_2
-        == data.maLoai_2,
+        or
 
-        LuatPhoiLoaiDo.maPhongCach
-        == data.maPhongCach,
+        luat.maLoai_2 != data.maLoai_2
 
-        LuatPhoiLoaiDo.maDipSD
-        == data.maDipSD,
+        or
 
-        LuatPhoiLoaiDo.maLuat
-        != maLuat
+        luat.maPhongCach != data.maPhongCach
 
-    ).first()
+        or
 
-    if checkLuat:
+        luat.maDipSD != data.maDipSD
+    ):
 
-        return {
+        checkLuat = db.query(
+            LuatPhoiLoaiDo
+        ).filter(
 
-            "success": False,
+            LuatPhoiLoaiDo.maLoai_1
+            == data.maLoai_1,
 
-            "message":
-            "Quy tắc đã tồn tại"
-        }
+            LuatPhoiLoaiDo.maLoai_2
+            == data.maLoai_2,
+
+            LuatPhoiLoaiDo.maPhongCach
+            == data.maPhongCach,
+
+            LuatPhoiLoaiDo.maDipSD
+            == data.maDipSD,
+
+            LuatPhoiLoaiDo.maLuat
+            != maLuat
+
+        ).first()
+
+        if checkLuat:
+
+            return {
+
+                "success": False,
+
+                "message":
+                "Quy tắc đã tồn tại"
+            }
 
     # UPDATE
 
-    luat.maLoai_1 = data.maLoai_1
+    luat.maLoai_1 = (
+        data.maLoai_1
+    )
 
-    luat.maLoai_2 = data.maLoai_2
+    luat.maLoai_2 = (
+        data.maLoai_2
+    )
 
-    luat.maPhongCach = data.maPhongCach
+    luat.maPhongCach = (
+        data.maPhongCach
+    )
 
-    luat.maDipSD = data.maDipSD
+    luat.maDipSD = (
+        data.maDipSD
+    )
 
-    luat.hopLe = data.hopLe
+    luat.hopLe = (
+        data.hopLe
+    )
 
     db.commit()
 
@@ -266,34 +291,4 @@ def cap_nhat_luat(
         "success": True,
 
         "data": luat
-    }
-
-def xoa_luat(
-    db: Session,
-    maLuat: int
-):
-
-    luat = db.query(
-        LuatPhoiLoaiDo
-    ).filter(
-
-        LuatPhoiLoaiDo.maLuat
-        == maLuat
-
-    ).first()
-
-    if not luat:
-
-        return {
-
-            "success": False
-        }
-
-    db.delete(luat)
-
-    db.commit()
-
-    return {
-
-        "success": True
     }
