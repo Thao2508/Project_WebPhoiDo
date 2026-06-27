@@ -519,7 +519,7 @@ export default function UpdateRuleDialog({
             onClick={handleUpdate}
           >
 
-            Lưu cập nhật
+            Lưu 
 
           </button>
 

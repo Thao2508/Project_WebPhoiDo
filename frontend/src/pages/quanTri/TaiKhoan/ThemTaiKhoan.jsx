@@ -55,7 +55,36 @@ export default function ThemTaiKhoan() {
 
   const handleThemTaiKhoan =
     async () => {
+      if (!tenDangNhap.trim()) {
 
+        alert("Vui lòng nhập tên đăng nhập");
+
+        return;
+      }
+
+      if (!email.trim()) {
+
+        alert("Vui lòng nhập email");
+
+        return;
+      }
+
+      const emailRegex =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(email)) {
+
+        alert("Email không đúng định dạng");
+
+        return;
+      }
+
+      if (!matKhau.trim()) {
+
+        alert("Vui lòng nhập mật khẩu");
+
+        return;
+      }
       try {
 
         // CHECK PASSWORD
@@ -77,24 +106,16 @@ export default function ThemTaiKhoan() {
         await axios.post(
           "http://127.0.0.1:8000/nguoi-dung/",
           {
-
-            tenDangNhap:
-              tenDangNhap,
-
-            email:
-              email,
-
-            matKhau:
-              matKhau,
-
+            tenDangNhap,
+            email,
+            matKhau,
             gioiTinh:
               Number(gioiTinh),
-
-            ngaySinh:
-              ngaySinh,
-
             vaiTro:
-              Number(vaiTro)
+              Number(vaiTro),
+            ...(ngaySinh && {
+              ngaySinh
+            })
           }
         );
 

@@ -40,7 +40,7 @@ export default function QuanLyTaiKhoan() {
 
   const [keyword, setKeyword] =
   useState("");
-  
+
   const [updateData, setUpdateData] =
     useState({
 
@@ -64,10 +64,6 @@ export default function QuanLyTaiKhoan() {
 
   }, []);
 
-  // =========================
-  // GET ALL USER
-  // =========================
-
   const layDanhSachTaiKhoan =
     async () => {
 
@@ -87,10 +83,6 @@ export default function QuanLyTaiKhoan() {
       }
     };
 
-  // =========================
-  // SEARCH
-  // =========================
-
   const handleSearch =
     async (value) => {
 
@@ -98,8 +90,6 @@ export default function QuanLyTaiKhoan() {
 
       try {
 
-        // Nếu ô search rỗng
-        // load lại toàn bộ
 
         if (value.trim() === "") {
 
@@ -122,9 +112,6 @@ export default function QuanLyTaiKhoan() {
       }
     };
 
-  // =========================
-  // KHÓA / MỞ KHÓA
-  // =========================
 
   const handleToggleStatus =
     async (user) => {
@@ -152,10 +139,6 @@ export default function QuanLyTaiKhoan() {
 
       }
     };
-
-  // =========================
-  // VIEW
-  // =========================
 
   const handleView = (user) => {
 
@@ -194,6 +177,27 @@ export default function QuanLyTaiKhoan() {
   const handleSaveUpdate =
   async () => {
 
+    if (!updateData.tenDangNhap.trim()) {
+      alert("Tên đăng nhập không được để trống");
+      return;
+    }
+
+    if (!updateData.email.trim()) {
+
+      alert("Email không được để trống");
+
+      return;
+    }
+
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(updateData.email)) {
+
+      alert("Email không đúng định dạng");
+
+      return;
+    }
     try {
 
       await axios.put(
@@ -211,14 +215,15 @@ export default function QuanLyTaiKhoan() {
           gioiTinh:
             Number(updateData.gioiTinh),
 
-          ngaySinh:
-            updateData.ngaySinh,
-
           vaiTro:
             Number(updateData.vaiTro),
 
-          ...(updateData.matKhau && {
+          ...(updateData.ngaySinh && {
+            ngaySinh:
+              updateData.ngaySinh
+          }),
 
+          ...(updateData.matKhau && {
             matKhau:
               updateData.matKhau
           })

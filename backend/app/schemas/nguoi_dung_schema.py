@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel,EmailStr
 from typing import Optional
 from datetime import date
 
@@ -6,7 +6,7 @@ from datetime import date
 class NguoiDungCreate(BaseModel):
 
     tenDangNhap: str
-    email: str
+    email: EmailStr
     matKhau: str
     gioiTinh: Optional[int] = None
     ngaySinh: Optional[date] = None
@@ -16,7 +16,7 @@ class NguoiDungCreate(BaseModel):
 class NguoiDungUpdate(BaseModel):
 
     tenDangNhap: Optional[str] = None
-    email: Optional[str] = None
+    email: Optional[EmailStr] = None
     matKhau: Optional[str] = None
     gioiTinh: Optional[int] = None
     ngaySinh: Optional[date] = None

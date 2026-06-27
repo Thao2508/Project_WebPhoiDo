@@ -66,6 +66,8 @@ export default function PhoiDoNgay() {
   const [loadingAI, setLoadingAI] =
     useState(false);
 
+  const [detectMessage, setDetectMessage] =useState("");
+
   const [loadingGenerate,
     setLoadingGenerate]
     = useState(false);
@@ -113,23 +115,6 @@ export default function PhoiDoNgay() {
 
   }, []);
 
-  useEffect(() => {
-
-    return () => {
-
-      images.forEach(img => {
-
-        if (img.preview) {
-
-          URL.revokeObjectURL(
-            img.preview
-          );
-        }
-      });
-
-    };
-
-  }, [images]);
 
   const loadLoai = async () => {
 
@@ -316,6 +301,9 @@ export default function PhoiDoNgay() {
 
         ...newItems
       ]);
+      setDetectMessage(
+        "✓ Đã phân tích xong hình ảnh. Vui lòng kiểm tra lại thông tin trang phục trước khi phối đồ."
+      );
 
     } catch (e) {
       console.error(e);
@@ -390,6 +378,9 @@ export default function PhoiDoNgay() {
     );
 
     setImages(newImages);
+    if (newImages.length === 0) {
+      setDetectMessage("");
+    }
   };
 
   // =========================
@@ -416,7 +407,30 @@ export default function PhoiDoNgay() {
 
       return false;
     }
+    const invalidType = images.find(
+      item => !item.formData.loaiTrangPhuc
+    );
 
+    if (invalidType) {
+
+      alert(
+        "Có ảnh chưa xác định được loại trang phục. Vui lòng chọn loại trang phục thủ công nếu ảnh là trang phục, hoặc xóa ảnh và tải lên ảnh khác trước khi phối đồ."
+      );
+
+      return false;
+    }
+    const invalidColor = images.find(
+      item => !item.formData.mauSac
+    );
+
+    if (invalidColor) {
+
+      alert(
+        "Có ảnh chưa xác định được màu sắc. Vui lòng chọn màu sắc thủ công hoặc tải lên ảnh có màu sắc rõ ràng trước khi phối đồ."
+      );
+
+      return false;
+    }
     let hasTop = false;
 
     let hasBottom = false;
@@ -445,7 +459,7 @@ export default function PhoiDoNgay() {
     if (!hasTop || !hasBottom) {
 
       alert(
-        "Cần ít nhất 1 thân trên và 1 thân dưới"
+        "Cần ít nhất 1 trang phục thân trên và 1 trang phục thân dưới để phối"
       );
 
       return false;
@@ -464,7 +478,7 @@ export default function PhoiDoNgay() {
 
       return;
     }
-
+    setResult([]);
     try {
 
       setLoadingGenerate(true);
@@ -564,7 +578,9 @@ export default function PhoiDoNgay() {
 
         return;
       }
-
+      alert(
+        `Đã tìm thấy ${outfits.length} bộ phối phù hợp.`
+      );
       setResult(
         outfits.map(item => ({
 
@@ -597,6 +613,7 @@ export default function PhoiDoNgay() {
     setSelectedStyle(null);
 
     setSelectedOccasion(null);
+    setDetectMessage("");
   };
 
   const saveClothingItem =
@@ -1035,7 +1052,17 @@ export default function PhoiDoNgay() {
 
               </div>
             )}
-
+            {loadingAI && (
+              <div className="ai-loading">
+                <div className="spinner"></div>
+                <p>Đang phân tích hình ảnh...</p>
+              </div>
+            )}
+            {detectMessage && !loadingAI && (
+              <div className="detect-message">
+                {detectMessage}
+              </div>
+            )}
             {/* PREVIEW */}
 
             {images.length > 0 && (

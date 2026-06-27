@@ -21,7 +21,7 @@ export default function DangNhapAdmin() {
     try {
 
       const response = await fetch(
-        "http://127.0.0.1:8000/api/auth/dangnhap",
+        "http://127.0.0.1:8000/auth/dangnhap",
         {
           method: "POST",
 

@@ -292,7 +292,7 @@ export default function UpdateLoaiDialog({
             onClick={handleUpdate}
           >
 
-            Lưu cập nhật
+            Lưu
 
           </button>
 

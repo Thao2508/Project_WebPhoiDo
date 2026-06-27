@@ -104,9 +104,9 @@ def xoa_yeu_thich(
 # LẤY DANH SÁCH YÊU THÍCH
 # =====================================================
 
-@router.get("/user/{ma_nguoi_dung}")
+@router.get("/user/{maNguoiDung}")
 def lay_outfit_yeu_thich(
-    ma_nguoi_dung: int,
+    maNguoiDung: int,
     db: Session = Depends(get_db)
 ):
 
@@ -114,7 +114,7 @@ def lay_outfit_yeu_thich(
 
         return yeu_thich_service.lay_outfit_yeu_thich(
             db,
-            ma_nguoi_dung
+            maNguoiDung
         )
 
     except Exception as e:

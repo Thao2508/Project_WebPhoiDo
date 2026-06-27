@@ -246,9 +246,9 @@ def get_all_trang_phuc(
         )
 
 
-@router.get("/user/{ma_nguoi_dung}")
+@router.get("/user/{maNguoiDung}")
 def get_trang_phuc_by_user(
-    ma_nguoi_dung: int,
+    maNguoiDung: int,
     db: Session = Depends(get_db)
     ):
     try:
@@ -269,7 +269,7 @@ def get_trang_phuc_by_user(
 
         ).filter(
 
-            TrangPhuc.maNguoiDung == ma_nguoi_dung,
+            TrangPhuc.maNguoiDung == maNguoiDung,
             TrangPhuc.trangThai == True
             
         ).all()
@@ -351,9 +351,9 @@ def get_trang_phuc_by_user(
             detail=f"Lỗi get by user: {str(e)}"
         )
 
-@router.get("/{ma_trang_phuc}")
+@router.get("/{maTrangPhuc}")
 def get_trang_phuc_by_id(
-    ma_trang_phuc: int,
+    maTrangPhuc: int,
     db: Session = Depends(get_db)
 ):
 
@@ -364,7 +364,7 @@ def get_trang_phuc_by_id(
         ).filter(
 
             TrangPhuc.maTrangPhuc
-            == ma_trang_phuc
+            == maTrangPhuc
 
         ).first()
 
@@ -418,9 +418,9 @@ def get_trang_phuc_by_id(
 
 
 # UPDATE
-@router.put("/cap-nhat/{ma_trang_phuc}")
+@router.put("/cap-nhat/{maTrangPhuc}")
 def update_trang_phuc(
-    ma_trang_phuc: int,
+    maTrangPhuc: int,
     payload: TrangPhucCreate,
     db: Session = Depends(get_db)
 ):
@@ -432,7 +432,7 @@ def update_trang_phuc(
         ).filter(
 
             TrangPhuc.maTrangPhuc
-            == ma_trang_phuc
+            == maTrangPhuc
 
         ).first()
 
@@ -506,9 +506,9 @@ def update_trang_phuc(
 
 
 # DELETE
-@router.delete("/{ma_trang_phuc}")
+@router.delete("/{maTrangPhuc}")
 def delete_trang_phuc(
-    ma_trang_phuc: int,
+    maTrangPhuc: int,
     db: Session = Depends(get_db)
     ):
 
@@ -520,7 +520,7 @@ def delete_trang_phuc(
         ).filter(
 
             TrangPhuc.maTrangPhuc
-            == ma_trang_phuc
+            == maTrangPhuc
 
         ).first()
 
@@ -538,7 +538,7 @@ def delete_trang_phuc(
         ).filter(
 
             ChiTietBoPhoi.maTrangPhuc
-            == ma_trang_phuc
+            == maTrangPhuc
 
         ).first()
 

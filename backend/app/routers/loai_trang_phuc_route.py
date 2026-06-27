@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 from fastapi import Depends
-
 from sqlalchemy.orm import Session
 
 from app.db.database import (
@@ -56,16 +55,16 @@ def create(
     )
 
 
-@router.put("/{id}")
+@router.put("/{maLuat}")
 def update(
-    id: int,
+    maLuat: int,
     data: LoaiTrangPhucCreate,
     db: Session = Depends(get_db)
 ):
 
     return loai_trang_phuc_service.cap_nhat_loai(
         db,
-        id,
+        maLuat,
         data
     )
 

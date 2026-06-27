@@ -225,7 +225,7 @@ export default function UpdateDanhMucDialog({
             onClick={handleUpdate}
           >
 
-            Lưu cập nhật
+            Lưu
 
           </button>
 

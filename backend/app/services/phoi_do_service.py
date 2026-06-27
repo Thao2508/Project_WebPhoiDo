@@ -775,7 +775,7 @@ def goi_y_phoi_do( db, selected_items, uploaded_items, ma_phong_cach, ma_dip_sd,
             "success": False,
 
             "message":
-            "Vui lòng chọn ít nhất 1 món thân trên và 1 món thân dưới để phối",
+            "Vui lòng chọn ít nhất 1 trang phục thân trên và 1 trang phục thân dưới để phối",
 
             "data": []
         }

@@ -276,7 +276,7 @@ export default function AddLoaiDialog({
             onClick={handleAdd}
           >
 
-            Thêm loại trang phục
+            Thêm 
 
           </button>
 

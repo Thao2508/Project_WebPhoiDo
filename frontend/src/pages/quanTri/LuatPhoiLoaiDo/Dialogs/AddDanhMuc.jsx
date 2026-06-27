@@ -206,7 +206,7 @@ export default function AddDanhMucDialog({
             onClick={handleAdd}
           >
 
-            Thêm danh mục
+            Thêm
 
           </button>
 

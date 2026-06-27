@@ -126,12 +126,6 @@ def find_clothing_type(ai_text, db):
                     "length": len(keyword)
                 })
 
-    # =====================================================
-    # FEATURE RULE
-    # =====================================================
-
-    # BLOUSE / ÁO KIỂU
-
     if (
 
         "collar" in ai_text
@@ -179,9 +173,6 @@ def find_clothing_type(ai_text, db):
         if crop:
             return crop
 
-    # =====================================================
-    # KHÔNG MATCH
-    # =====================================================
 
     if not matched_results:
 
@@ -213,9 +204,6 @@ def find_clothing_type(ai_text, db):
 
         return None
 
-    # =====================================================
-    # ƯU TIÊN KEYWORD DÀI NHẤT
-    # =====================================================
 
     matched_results.sort(
 
@@ -306,7 +294,8 @@ def detect_kieu_dang(ai_text):
 
         return "Rách"
 
-    if "pleated" in ai_text:
+    if ("pleated" in ai_text
+        or "pleat" in ai_text):
 
         return "Xếp ly"
 
@@ -462,56 +451,14 @@ async def detect_clothing(file, db):
     )
 
 
-    image = Image.open(
+    colors = result.get("data", {}).get("colors", [])
 
-        BytesIO(
-            image_response.content
-        )
+    if colors:
+        hex_color = "#" + colors[0]["hex_code"]
+        mau = find_closest_color(hex_color, db)
+    else:
+        mau = None
 
-    ).convert("RGB")
-
-    image = image.resize(
-        (100, 100)
-    )
-
-    width, height = image.size
-
-    crop = image.crop(
-        (
-            width * 0.2,
-            height * 0.2,
-            width * 0.8,
-            height * 0.8
-        )
-    )
-    pixels = list(
-        crop.getdata()
-    )
-
-    avg_color = tuple(
-
-        sum(
-            p[i]
-            for p in pixels
-        ) // len(pixels)
-
-        for i in range(3)
-    )
-
-    hex_color = (
-        '#%02x%02x%02x'
-        % avg_color
-    )
-
-    mau = find_closest_color(
-        hex_color,
-        db
-    )
-
-
-    # =====================================================
-    # FIND PATTERN
-    # =====================================================
 
     hoa_tiet = detect_pattern(
         ai_text,
